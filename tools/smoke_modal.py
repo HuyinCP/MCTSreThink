@@ -1,10 +1,10 @@
 import os
 
-from openai import OpenAI
 from dotenv import load_dotenv
+from openai import OpenAI
+
 
 load_dotenv()
-
 
 client = OpenAI(
     base_url=os.environ["MODAL_BASE_URL"],
@@ -14,14 +14,8 @@ client = OpenAI(
 completion = client.chat.completions.create(
     model=os.environ["KIMI_MODEL"],
     messages=[
-        {
-            "role": "system",
-            "content": "You are a concise technical assistant.",
-        },
-        {
-            "role": "user",
-            "content": "1 + 1 = ",
-        },
+        {"role": "system", "content": "You are a concise technical assistant."},
+        {"role": "user", "content": "1 + 1 = "},
     ],
     temperature=0.3,
     max_tokens=2048,

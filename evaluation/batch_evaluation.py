@@ -47,6 +47,12 @@ def parse_args(
     parser.add_argument("--split", default="test", choices=("train", "test"))
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     parser.add_argument("--workers", type=int, default=min(4, os.cpu_count() or 1))
+    parser.add_argument(
+        "--test-workers",
+        type=int,
+        default=1,
+        help="APPS tests to execute concurrently inside each candidate worker.",
+    )
     parser.add_argument("--timeout", type=float, default=None)
     parser.add_argument("--max-tests", type=int, default=None)
     parser.add_argument("--limit", type=int, default=None)
@@ -63,6 +69,8 @@ def parse_args(
     args = parser.parse_args(argv)
     if args.workers <= 0:
         parser.error("--workers must be greater than zero")
+    if args.test_workers <= 0:
+        parser.error("--test-workers must be greater than zero")
     if args.timeout is not None and args.timeout <= 0:
         parser.error("--timeout must be greater than zero")
     if args.limit is not None and args.limit <= 0:
@@ -198,7 +206,10 @@ def _evaluate_candidate(payload: dict[str, Any]) -> dict[str, Any]:
         if candidate.dataset == "apps":
             from Executors import AppsExecutor
 
-            executor = AppsExecutor(timeout_per_test=payload["timeout"] or 2.0)
+            executor = AppsExecutor(
+                timeout_per_test=payload["timeout"] or 2.0,
+                test_workers=payload["test_workers"],
+            )
             execution = executor.evaluate(
                 code,
                 candidate.problem_id,
@@ -410,6 +421,7 @@ def main(
             **candidate.__dict__,
             "artifact_dir": str(candidate.artifact_dir),
             "timeout": args.timeout,
+            "test_workers": args.test_workers,
             "max_tests": args.max_tests,
             "resume": not args.no_resume,
         }

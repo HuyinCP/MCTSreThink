@@ -1,22 +1,21 @@
 # GPU thuê CKEY
 
-## Benchmark dang chay
+## Benchmark đã hoàn thành
 
 Sau khi instance CKEY hoat dong, benchmark duoc chot nhu sau:
 
 - Model: `qwen2.5-coder:7b-instruct`.
-- APPS: 100 bai test trong `data/samples/baseline_v1/apps_test_100.json`.
-- HumanEval: 100 bai test trong `data/samples/baseline_v1/humaneval_test_100.json`.
+- APPS: 100 bài test trong `data/samples/evaluation_v1/apps_test_100.json`.
+- HumanEval: 100 bài test trong `data/samples/evaluation_v1/humaneval_test_100.json`.
 - Run: `qwen25_coder_7b_instruct_baseline_v1`.
 - Generation: bat dau `--generation-workers 1`; chi tang len 2 neu Ollama on dinh.
-- MCTS ve sau dung lai hai manifest nay, khong sample lai.
+- MCTS về sau dùng lại hai manifest `evaluation_v1`, không sample lại.
 
 Lenh generation/evaluation chinh thuc nam trong `baselines/README.md` va
 `docs/pipeline-direct.md`.
 
-Phan lenh HumanEval full o ben duoi la ghi chu lich su cua ke hoach 164 bai; khong
-dung cho benchmark v1. Benchmark v1 phai dung sample manifest 100 bai va run name
-moi neu o tren.
+Generation full đã hoàn thành. Các lệnh bên dưới là runbook tái lập hoặc kiểm tra
+instance, không phải trạng thái đang chạy.
 
 Tài liệu vận hành instance GPU thuê dùng cho direct-generation baseline. Đây là
 thông tin của instance hiện tại, không phải cấu hình cố định cho mọi lần thuê GPU.

@@ -68,6 +68,12 @@ def parse_args(
         default=None,
         help="Per-test APPS timeout or whole-harness HumanEval timeout.",
     )
+    parser.add_argument(
+        "--evaluation-test-workers",
+        type=int,
+        default=1,
+        help="APPS tests to execute concurrently when --evaluate is enabled.",
+    )
     if dataset != "humaneval":
         parser.add_argument(
             "--max-tests",
@@ -112,7 +118,10 @@ def _evaluate_artifact(args: argparse.Namespace, code: str, run_dir: Path):
         from Executors import AppsExecutor
 
         timeout = args.evaluation_timeout if args.evaluation_timeout is not None else 2.0
-        executor = AppsExecutor(timeout_per_test=timeout)
+        executor = AppsExecutor(
+            timeout_per_test=timeout,
+            test_workers=getattr(args, "evaluation_test_workers", 1),
+        )
         report = executor.evaluate(
             code,
             args.problem_id,

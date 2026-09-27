@@ -5,7 +5,7 @@
 Sample benchmark co dinh cho MCTS/judge chay rieng tung dataset voi manifest bat
 bien va dung cung `--sample-file` o evaluation stage:
 
-Cap nhat van hanh: full direct baseline dang duoc chay tiep trong cung run/model;
+Cap nhat van hanh: direct baseline da hoan thanh generation va evaluation sample;
 lenh chinh thuc va quy tac resume nam tai
 [`docs/runbooks/baseline-full.md`](runbooks/baseline-full.md). Phan sample 100 o
 duoi van la benchmark tham chieu rieng cho MCTS, khong bi xoa.
@@ -19,13 +19,12 @@ $config = "baselines/direct_generation/configs/qwen25_coder_7b_instruct.json"
 
 .\venv\Scripts\python.exe -m pipelines `
   --stage generate --dataset apps --run-name $run --config $config `
-  --sample-file data/samples/evaluation_v1/apps_test_100.json `
   --generation-workers 1 --delay 1 --confirm-full-run
 
 .\venv\Scripts\python.exe -m pipelines `
   --stage evaluate --dataset apps --run-name $run `
-  --sample-file data/samples/baseline_v1/apps_test_100.json `
-  --workers 4 --confirm-full-run
+  --sample-file data/samples/evaluation_v1/apps_test_100.json `
+  --workers 8 --test-workers 4 --evaluation-timeout 300 --confirm-full-run
 ```
 
 Lap lai hai lenh tren cho `humaneval` voi file
@@ -237,3 +236,22 @@ Voi benchmark moi, log pipeline duoc tach tiep theo model:
 - `evaluation.json`, `results.jsonl`, `results.csv`, `summary.json` được tạo đúng.
 - Candidate sai xuất hiện đúng trong `failures.jsonl/csv` và `evaluation.log`, kèm
   số test pass/tổng test và index test fail.
+## Song song hai tầng khi evaluation
+
+Evaluation hỗ trợ hai mức song song:
+
+- `--workers`: số bài chạy đồng thời.
+- `--test-workers`: số test APPS chạy đồng thời bên trong mỗi bài.
+
+Mỗi test vẫn chạy trong subprocess riêng, có timeout riêng và kết quả được trả về
+đúng thứ tự index. HumanEval không có nhiều test độc lập nên `--test-workers`
+không ảnh hưởng đến HumanEval.
+
+Với máy 32 logical CPU, cấu hình cân bằng cho sample APPS là:
+
+```powershell
+--workers 8 --test-workers 4
+```
+
+Tổng tối đa khoảng 32 candidate subprocess. Không nên chạy thêm một evaluator
+khác trên cùng run vì các tiến trình sẽ ghi chung `evaluation.json`.

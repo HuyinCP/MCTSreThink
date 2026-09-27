@@ -20,8 +20,8 @@ Tài liệu này phân biệt rõ mô tả trong paper với hành vi đã quan 
 | Dataset | Đã chuẩn bị, xem `docs/datasets.md` |
 | `data/scripts/prepare_humaneval.py` | Sau bước kiểm tra dữ liệu cục bộ vẫn gọi `load_dataset()` ở cuối, nên có thể truy cập mạng không cần thiết |
 | `data/scripts/prepare_apps.py` | Chỉ kiểm tra thư mục `raw` tồn tại, chưa tự xác minh đủ file/số mẫu trước khi bỏ qua |
-| LLM provider | Modal.com, giao diện OpenAI-compatible, cấu hình qua `.env` |
-| `test.py` | Đã đọc endpoint/model từ `.env`; chưa chạy request xác minh |
+| LLM provider | Ollama hiện tại; Modal.com được giữ để audit run cũ; cấu hình qua `.env` |
+| `tools/smoke_modal.py` | Smoke script lịch sử cho Modal, không phải benchmark entry point |
 | Python environment | `D:\ReThinkMCTS\venv`, Python 3.14.5 |
 | Windows portability | Executor gốc import module Unix `resource`; cần xử lý hoặc chạy trong Linux/WSL |
 | `pyext` compatibility | `pyext==0.7` không build trên Python 3.14; cần thay `RuntimeModule.from_string` bằng local shim |
@@ -76,5 +76,5 @@ Câu hỏi còn mở:
 
 Phan audit Modal ben duoi la lich su cua run cu. Benchmark hien tai dung Ollama
 voi `qwen2.5-coder:7b-instruct` va hai sample manifest co dinh tai
-`data/samples/baseline_v1/`; xem `docs/llm-provider.md` va `docs/pipeline-direct.md`.
+`data/samples/evaluation_v1/`; xem `docs/llm-provider.md` và `docs/pipeline-direct.md`.
 

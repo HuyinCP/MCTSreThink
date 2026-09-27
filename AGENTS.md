@@ -126,5 +126,6 @@ rethinkmcts-project/
 │   │   └── raw/
 │   └── humaneval/
 │       └── arrow/
+├── tools/                       (smoke/check script ngoài pipeline)
 └── notebooks/                   (thử nghiệm nhanh, quan sát log)
 ```

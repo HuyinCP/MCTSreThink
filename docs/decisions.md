@@ -19,9 +19,9 @@ Các quyết định ở đây được xem là đang có hiệu lực cho tới
 
 - Ngày: 2026-09-27
 - Trạng thái: Chấp nhận
-- Quyết định: Baseline hien tai dung `qwen2.5-coder:7b-instruct` qua Ollama va chi
-  chay 100 bai APPS test + 100 bai HumanEval test trong hai manifest co dinh tai
-  `data/samples/baseline_v1/`.
+- Quyết định: Baseline hiện tại dùng `qwen2.5-coder:7b-instruct` qua Ollama và
+  judge 100 bài APPS test + 100 bài HumanEval test trong hai manifest cố định tại
+  `data/samples/evaluation_v1/`. `baseline_v1` chỉ giữ để truy vết lịch sử.
 - Lý do: Giam chi phi, tranh sample drift va tao tap so sanh co dinh cho MCTS sau nay.
 - Ràng buộc: Moi lan chay generation/evaluation phai dung cung sample file; output
   phai nam duoi `outputs/baselines/<stage>/<run>/<model>/<dataset>/`. Run cu cua

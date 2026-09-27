@@ -106,3 +106,24 @@ bên trong container/VM riêng, tắt mạng và đặt giới hạn CPU/RAM ở
 - Timeout được ghi nhận và tiến trình kết thúc.
 - `HumanEval/0` pass với implementation đúng và fail với implementation sai.
 - Không có request nào được gửi tới Modal trong quá trình test.
+## Đánh giá lại với timeout rộng hơn
+
+Mặc định APPS dùng timeout `2` giây cho từng test case. Để kiểm tra lại các
+candidate mà không dừng quá sớm, chạy:
+
+```powershell
+.\venv\Scripts\python.exe -m pipelines `
+  --stage evaluate `
+  --dataset apps `
+  --run-name qwen25_coder_7b_instruct_baseline_v1 `
+  --model qwen2.5-coder:7b-instruct `
+  --sample-file data/samples/evaluation_v1/apps_test_100.json `
+  --workers 2 `
+  --evaluation-timeout 300 `
+  --no-resume `
+  --confirm-full-run
+```
+
+`--evaluation-timeout 300` áp dụng tối đa 300 giây cho **mỗi test case**, không
+phải toàn bộ bài. Bài có nhiều test có thể mất hơn 5 phút. `--no-resume` chỉ
+chạy lại evaluator và ghi đè báo cáo evaluation; không sửa `solution.py`.

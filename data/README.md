@@ -1,19 +1,24 @@
 # Dataset: APPS và HumanEval
 
-## Sample benchmark co dinh
+## Sample benchmark cố định
 
-Du lieu goc van gom 5.000 APPS test va 164 HumanEval test, nhung benchmark baseline
-hien tai chi dung 100 bai ngau nhien moi dataset. Danh sach da duoc dong bang va
-khong duoc tao lai khi chay lai:
+Dữ liệu gốc gồm 5.000 APPS test và 164 HumanEval test. Project giữ hai loại
+manifest cố định với mục đích khác nhau:
 
 ```text
 data/samples/baseline_v1/apps_test_100.json
 data/samples/baseline_v1/humaneval_test_100.json
+data/samples/evaluation_v1/apps_test_100.json
+data/samples/evaluation_v1/humaneval_test_100.json
 ```
 
-Moi manifest co `sample_id`, `dataset`, `split`, `seed`, `population_size`,
-`sample_size` va `problem_ids`. Hai file nay la input chung cho direct baseline va
-cac thi nghiem MCTS sau nay.
+`baseline_v1` là sample tham chiếu cũ được giữ để truy vết lịch sử. `evaluation_v1`
+là sample judge chính thức cho baseline hiện tại và các thí nghiệm MCTS sau này.
+Không bốc lại ID khi đổi model hoặc phương pháp.
+
+Mỗi manifest có `sample_id`, `dataset`, `split`, `seed`, `population_size`,
+`sample_size` và `problem_ids`. Manifest APPS còn có `difficulty_by_problem_id`
+để tạo nhóm Intro./Inter./Comp.
 
 Tài liệu này mô tả hai bộ dữ liệu đang được sử dụng trong dự án:
 

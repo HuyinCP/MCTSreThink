@@ -4,6 +4,7 @@ import json
 import math
 import sys
 import tempfile
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
 
@@ -102,10 +103,14 @@ class AppsExecutor:
         data_root: str | Path = DEFAULT_APPS_ROOT,
         *,
         timeout_per_test: float = 2.0,
+        test_workers: int = 1,
         python_executable: str | Path = sys.executable,
     ) -> None:
         self.data_root = Path(data_root)
         self.timeout_per_test = timeout_per_test
+        if test_workers <= 0:
+            raise ValueError("test_workers must be greater than zero")
+        self.test_workers = test_workers
         self.python_executable = python_executable
 
     def evaluate(
@@ -139,15 +144,22 @@ class AppsExecutor:
 
         function_name = payload.get("fn_name")
         mode = "call_based" if function_name else "stdin_stdout"
-        results = []
-        for index, (test_input, expected) in enumerate(selected):
+        def run_case(item: tuple[int, tuple[Any, Any]]) -> TestCaseResult:
+            index, (test_input, expected) = item
             if function_name:
-                result = self._run_call_case(
+                return self._run_call_case(
                     code, index, function_name, test_input, expected
                 )
-            else:
-                result = self._run_stdin_case(code, index, test_input, expected)
-            results.append(result)
+            return self._run_stdin_case(code, index, test_input, expected)
+
+        indexed_cases = list(enumerate(selected))
+        if self.test_workers == 1 or len(indexed_cases) <= 1:
+            results = [run_case(item) for item in indexed_cases]
+        else:
+            # Each test owns its temporary directory/process, so APPS cases can
+            # run concurrently without sharing candidate state or output files.
+            with ThreadPoolExecutor(max_workers=self.test_workers) as pool:
+                results = list(pool.map(run_case, indexed_cases))
 
         return build_report(
             dataset="apps",

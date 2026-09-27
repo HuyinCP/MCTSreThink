@@ -10,8 +10,9 @@ Run hien tai dung model Ollama `qwen2.5-coder:7b-instruct` tren GPU CKEY va chay
 
 Run name dang dung: `qwen25_coder_7b_instruct_baseline_v1`.
 
-Hai manifest 100 bai co dinh tai `data/samples/baseline_v1/` van duoc giu rieng
-de so sanh voi MCTS sau nay. Full run khong truyen `--sample-file`.
+Hai manifest `baseline_v1` được giữ riêng để truy vết lịch sử. Sample judge chính
+thức cho baseline và MCTS sau này là `data/samples/evaluation_v1/`.
+Full generation không truyền `--sample-file`.
 
 Judge cua full run dung hai manifest rieng:
 
@@ -98,7 +99,7 @@ APPS:
   --run-name qwen25_coder_7b_instruct_baseline_v1 `
   --model qwen2.5-coder:7b-instruct `
   --sample-file data/samples/evaluation_v1/apps_test_100.json `
-  --workers 4 --confirm-full-run
+  --workers 8 --test-workers 4 --evaluation-timeout 300 --confirm-full-run
 ```
 
 HumanEval:
@@ -109,7 +110,7 @@ HumanEval:
   --run-name qwen25_coder_7b_instruct_baseline_v1 `
   --model qwen2.5-coder:7b-instruct `
   --sample-file data/samples/evaluation_v1/humaneval_test_100.json `
-  --workers 4 --confirm-full-run
+  --workers 8 --evaluation-timeout 300 --confirm-full-run
 ```
 
 Evaluation cung resume: candidate da co `evaluation.json` se duoc skip.
@@ -154,3 +155,24 @@ Get-Content outputs\baselines\evaluations\qwen25_coder_7b_instruct_baseline_v1\q
 
 Failure chi tiet nam trong `failures.csv`, `failures.jsonl`, `evaluation.log` va
 `evaluation.json` cua tung candidate.
+## Đánh giá lại APPS với timeout 5 phút
+
+Nếu lần đánh giá trước dùng timeout 2 giây và cần kiểm tra lại candidate mà
+không sinh lại code:
+
+```powershell
+.\venv\Scripts\python.exe -m pipelines `
+  --stage evaluate `
+  --dataset apps `
+  --run-name qwen25_coder_7b_instruct_baseline_v1 `
+  --model qwen2.5-coder:7b-instruct `
+  --sample-file data/samples/evaluation_v1/apps_test_100.json `
+  --workers 2 `
+  --evaluation-timeout 300 `
+  --no-resume `
+  --confirm-full-run
+```
+
+Timeout hiện tại là theo từng test case. `--no-resume` ghi đè các file
+`evaluation.json` và aggregate evaluation, nhưng không ghi đè artifact
+generation hay code đã sinh.

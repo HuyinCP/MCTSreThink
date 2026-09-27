@@ -9,7 +9,7 @@ nhung khong phai provider cua benchmark v1.
 ## Quyết định hiện tại
 
 Dự án có adapter cho endpoint OpenAI-compatible trên **Modal.com**, nhưng benchmark
-tiếp theo dự kiến chạy trên Ollama tại GPU thuê CKEY. Cấu hình runtime nằm trong file
+hiện tại chạy trên Ollama tại GPU thuê CKEY. Cấu hình runtime nằm trong file
 `.env` ở thư mục gốc; không hard-code endpoint, token hoặc tên model trong source code.
 
 Thông tin instance GPU và checklist vận hành nằm tại [GPU runtime](gpu/README.md).
@@ -67,7 +67,8 @@ model = os.environ["KIMI_MODEL"]
 - `.env` tồn tại.
 - Bốn biến bắt buộc đều có mặt và không rỗng.
 - `MODAL_BASE_URL` có dạng URL HTTP(S).
-- `test.py` đọc endpoint và model từ biến môi trường.
+- `tools/smoke_modal.py` là smoke script lịch sử cho Modal; pipeline benchmark hiện
+  tại dùng `pipelines` với provider Ollama.
 
 Đã gửi request thật qua endpoint Modal và nhận được response/usage. Một lần cấu hình
 route sai trả `404 route not found`; sau khi sửa `.env`, plan resolve đúng model và

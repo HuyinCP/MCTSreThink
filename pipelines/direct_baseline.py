@@ -45,6 +45,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--retries", type=int, default=0)
     parser.add_argument("--generation-workers", type=int, default=2)
     parser.add_argument("--workers", type=int, default=min(4, os.cpu_count() or 1))
+    parser.add_argument("--test-workers", type=int, default=1)
     parser.add_argument("--evaluation-timeout", type=float, default=None)
     parser.add_argument("--max-tests", type=int, default=None)
     parser.add_argument("--no-resume", action="store_true")
@@ -107,6 +108,7 @@ def _generation_args(args: argparse.Namespace) -> list[str]:
 def _evaluation_args(args: argparse.Namespace, dataset: str) -> list[str]:
     values = _shared_args(args)
     values.extend(("--workers", str(args.workers)))
+    values.extend(("--test-workers", str(args.test_workers)))
     if args.evaluation_timeout is not None:
         values.extend(("--timeout", str(args.evaluation_timeout)))
     if dataset == "apps" and args.max_tests is not None:

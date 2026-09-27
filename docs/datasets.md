@@ -8,11 +8,11 @@ chi chon dung 100 bai ngau nhien moi dataset:
 
 | Dataset | Sample manifest | So bai benchmark | Co dinh cho MCTS |
 |---|---|---:|---|
-| APPS test | `data/samples/baseline_v1/apps_test_100.json` | 100 | Co |
-| HumanEval test | `data/samples/baseline_v1/humaneval_test_100.json` | 100 | Co |
+| APPS test | `data/samples/evaluation_v1/apps_test_100.json` | 100 | Co |
+| HumanEval test | `data/samples/evaluation_v1/humaneval_test_100.json` | 100 | Co |
 
-Sample dung cho judge full-generation duoc tach rieng de khong tron voi sample
-baseline tham chieu:
+`baseline_v1` là sample lịch sử được giữ để truy vết, không phải sample judge hiện tại.
+Sample dùng cho judge full-generation được khóa riêng:
 
 | Dataset | Judge manifest | So bai |
 |---|---|---:|

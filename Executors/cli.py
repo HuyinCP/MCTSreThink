@@ -13,6 +13,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--code-file", required=True, type=Path)
     parser.add_argument("--split", default="test", choices=("train", "test"))
     parser.add_argument("--timeout", type=float, default=None)
+    parser.add_argument("--test-workers", type=int, default=1)
     parser.add_argument("--max-tests", type=int, default=None)
     parser.add_argument("--report-file", type=Path, default=None)
     return parser.parse_args()
@@ -22,7 +23,10 @@ def main() -> int:
     args = parse_args()
     code = args.code_file.read_text(encoding="utf-8")
     if args.dataset == "apps":
-        executor = AppsExecutor(timeout_per_test=args.timeout or 2.0)
+        executor = AppsExecutor(
+            timeout_per_test=args.timeout or 2.0,
+            test_workers=args.test_workers,
+        )
         report = executor.evaluate(
             code,
             args.problem_id,
