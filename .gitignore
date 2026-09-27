@@ -1,6 +1,12 @@
 .vscode
+venv/
+__pycache__/
+*.py[cod]
+.env
+.env.*
+!.env.example
 relativeword
-docs
 CLAUDE.md
-
-
+data/apps/raw/
+data/humaneval/arrow/
+outputs/
