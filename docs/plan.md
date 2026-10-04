@@ -27,9 +27,11 @@ nghiệm API bắt đầu bằng 1-2 bài và rollout thấp để kiểm soát 
 
 ## Giai đoạn hiện tại
 
-Đang ở **pipeline direct generation và đánh giá song song**: generation lưu toàn bộ
-candidate trước, sau đó process pool chấm APPS/HumanEval và tổng hợp metric. Chưa
-triển khai MCTS. Bước kế tiếp là smoke test Modal 1-2 bài rồi mới chạy full dataset.
+Đang ở **native RethinkMCTS implementation - ready for smoke test**. Direct baseline
+đã hoàn tất; native package đã có tree, P-UCB, expansion, code evaluation, dual
+evaluation reward, feedback, rethink, backpropagation và artifact writer. Unit test
+offline đã pass `41/41`. Chưa gọi LLM thật và chưa chạy benchmark MCTS. Bước kế tiếp
+là smoke test một bài HumanEval và một bài APPS qua Ollama trên GPU CKEY.
 
 ### Definition of Done cho direct-generation baseline
 
@@ -56,33 +58,34 @@ triển khai MCTS. Bước kế tiếp là smoke test Modal 1-2 bài rồi mới
 - Evaluation song song theo candidate với số worker cấu hình được.
 - Mỗi candidate có `evaluation.json`; mỗi dataset có JSONL, CSV và summary.
 - Full run cần xác nhận rõ để tránh gọi API hoặc thực thi hàng loạt ngoài ý muốn.
-- Pipeline plan và evaluation offline có unit test; smoke Modal thật vẫn cần chạy.
+- Pipeline plan và evaluation offline có unit test; smoke Ollama thật vẫn cần chạy.
 
-## Definition of Done cho baseline RethinkMCTS sau này
+## Definition of Done cho native RethinkMCTS smoke/baseline
 
 Baseline chỉ được xem là chạy được khi đáp ứng đủ:
 
 - Repo gốc và commit hash được ghi nhận.
-- Dependency và lệnh chạy có thể tái lập.
+- Dependency và lệnh chạy có thể tái lập trong `D:\ReThinkMCTS\venv`.
 - Loader đọc đúng một mẫu APPS hoặc HumanEval.
 - Executor chạy được public tests với timeout.
-- Một lượt search tạo được thought, code, reward và kết quả test.
+- Một lượt search tạo được thought, code, reward và kết quả test dưới namespace
+  `outputs/rethinkmcts/`.
 - Có bằng chứng rethink được kích hoạt trên ít nhất một trường hợp lỗi, hoặc ghi rõ
   đã thử nhưng chưa kích hoạt với cấu hình nào.
 - Log đủ để đối chiếu với sáu pha trong paper.
-- Chi phí API và số request được ghi lại.
+- Chi phí API và số request được ghi lại, không ghi secret.
 
 ## Ngoài phạm vi hiện tại
 
-- Viết MCTS riêng trước khi hiểu code gốc.
 - Reward phân biệt TLE/MLE.
 - Root-cause identification cho thought.
 - CodeContests.
-- Chạy toàn bộ benchmark hoặc rollout lớn.
-# Cap nhat pham vi hien tai (2026-09-27)
+- Chạy toàn bộ benchmark hoặc rollout lớn trước khi smoke được duyệt.
 
-Truoc khi chuyen sang MCTS, direct baseline generation chay full APPS test va
-HumanEval test voi model `qwen2.5-coder:7b-instruct` qua Ollama. Judge evaluation
-dung sample co dinh 100 bai moi dataset trong `data/samples/evaluation_v1/`; tap nay
-se duoc tai lai khi gan MCTS.
+## Bối cảnh direct baseline
+
+Direct baseline đã sinh full APPS test và HumanEval test với model
+`qwen2.5-coder:7b-instruct` qua Ollama. Judge dùng sample cố định 100 bài mỗi
+dataset trong `data/samples/evaluation_v1/`; native RethinkMCTS sẽ dùng lại policy
+này khi thiết kế experiment runner.
 

@@ -1,11 +1,12 @@
 # Trạng thái dự án
 
-Cập nhật lần cuối: **2026-09-27**.
+Cập nhật lần cuối: **2026-10-04**.
 
 ## Giai đoạn hiện tại
 
-Dự án đã hoàn thành checkpoint **DIRECT-GENERATION + OFFLINE EVALUATION** cho
-baseline đầu tiên. Chưa bắt đầu triển khai MCTS/RethinkMCTS.
+Dự án đã hoàn thành checkpoint **DIRECT-GENERATION + OFFLINE EVALUATION** và đã có
+bản native **RethinkMCTS implementation-ready-for-smoke-test**. Chưa gọi LLM và
+chưa chạy benchmark MCTS thật.
 
 ## Baseline đã hoàn thành
 
@@ -54,9 +55,15 @@ outputs/baselines/evaluations/
   `--test-workers`.
 - Judge tạo macro Pass Rate, micro Pass Rate và Pass@1 cho APPS; HumanEval chỉ
   báo Pass@1 theo quy ước đã chốt.
-- Unit test hiện tại pass `29/29`.
+- Unit test hiện tại pass `45/45`, gồm direct baseline, executor, judge, pipeline
+  và native RethinkMCTS.
 - Code generated của baseline không bị thay đổi trong quá trình cleanup tài liệu.
 - Run cũ Modal/Qwen được giữ riêng trong namespace `direct_full_v1`.
+- Repo tác giả được pin tại `vendor_rethinkmcts/` ở commit
+  `3908cacd94feed849f671f6de39f0baec00ed72c`.
+- Native package nằm tại `rethinkmcts/`, artifact tách dưới `outputs/rethinkmcts/`.
+- Native selection, vòng Rethink, candidate thought snapshot và APPS call-based
+  trace đã được chỉnh theo audit; xem `docs/implementation-audit.md`.
 
 ## Quyết định phạm vi
 
@@ -69,11 +76,12 @@ outputs/baselines/evaluations/
 
 ## Chưa hoàn thành
 
-- Triển khai thuật toán MCTS/RethinkMCTS theo paper.
-- Clone và audit implementation gốc của RethinkMCTS.
+- Chạy smoke thật một bài HumanEval và một bài APPS với Ollama trên GPU CKEY.
+- Đối chiếu output native với log/reward của repo gốc sau khi có smoke run.
+- Thay trace AST hiện tại bằng CFG/basic-block đầy đủ nếu cần đối chiếu feedback
+  chính xác với repo gốc.
 - Tách executor vào sandbox/container có giới hạn mạng, CPU và RAM thật sự.
-- Thiết kế experiment runner cho nhiều model, temperature và rollout khi bước
-  MCTS bắt đầu.
+- Thiết kế experiment runner cho 100 bài sample và nhiều model/rollout.
 
 ## Cách cập nhật
 

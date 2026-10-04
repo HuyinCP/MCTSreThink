@@ -18,7 +18,8 @@ Phạm vi đã chạy:
 - Sinh code: toàn bộ APPS test (5.000 bài) và HumanEval test (164 bài).
 - Đánh giá: sample cố định 100 bài APPS và 100 bài HumanEval.
 - Judge: APPS Pass Rate/Pass@1 theo difficulty và HumanEval Pass@1.
-- MCTS/RethinkMCTS: **chưa triển khai**.
+- RethinkMCTS native: **đã triển khai và kiểm thử offline**, chưa gọi LLM thật.
+- Bước kế tiếp: smoke test 1 HumanEval và 1 APPS với Ollama trên GPU CKEY.
 
 Kết quả baseline hiện tại:
 
@@ -40,6 +41,9 @@ Kết quả chi tiết nằm trong:
 3. [docs/runbooks/baseline-full.md](docs/runbooks/baseline-full.md): các lệnh vận hành benchmark.
 4. [docs/datasets.md](docs/datasets.md): phạm vi và quyết định về APPS/HumanEval.
 5. [docs/theory-rethinkmcts.md](docs/theory-rethinkmcts.md): thuật toán nền tảng từ paper.
+6. [rethinkmcts/README.md](rethinkmcts/README.md): thuật toán native từng bước, chi phí mỗi node và điểm khác paper.
+7. [docs/rethinkmcts-implementation.md](docs/rethinkmcts-implementation.md): kiến trúc native, artifact và khác biệt với repo tác giả.
+8. [docs/runbooks/rethinkmcts-smoke.md](docs/runbooks/rethinkmcts-smoke.md): kiểm thử offline và lệnh smoke test.
 
 ## Kiến trúc thư mục
 
@@ -64,16 +68,20 @@ D:\ReThinkMCTS\
 ├── evaluation/               # Batch evaluation và benchmark judge
 ├── ChatModels/               # Adapter Ollama/Modal OpenAI-compatible
 ├── DataProcess/              # Loader đề bài, không đọc solution khi generate
-├── Models/                   # Reserved cho model/MCTS, hiện chưa triển khai
+├── vendor_rethinkmcts/       # Repo tác giả, pin commit để audit, không sửa
+├── rethinkmcts/              # Native implementation của tree/search/reward
+├── Models/                   # Reserved cho model/MCTS cũ
 ├── tests/                    # Unit test offline
 ├── tools/                    # Smoke/check script không thuộc pipeline chính
 │
 └── outputs/                  # Artifact sinh tự động, không sửa thủ công
-    └── baselines/
-        ├── direct_generation/
-        ├── batch_manifests/
-        ├── evaluations/
-        └── pipeline_logs/
+    ├── baselines/
+    │   ├── direct_generation/
+    │   ├── batch_manifests/
+    │   ├── evaluations/
+    │   └── pipeline_logs/
+    └── rethinkmcts/
+        └── <run>/<model>/<dataset>/<problem_id>/
 ```
 
 Quy ước quan trọng:
@@ -82,7 +90,7 @@ Quy ước quan trọng:
 - `data/samples/evaluation_v1/` là sample judge chính thức dùng chung cho model và MCTS sau này.
 - `outputs/` là output; mỗi run được tách theo `run/model/dataset`.
 - Không dùng CodeContests trong phạm vi hiện tại.
-- Không chạy MCTS trước khi direct baseline và executor được chốt.
+- Native search không ghi artifact vào `outputs/baselines/`; hai namespace được tách độc lập.
 
 ## Môi trường
 
@@ -175,6 +183,30 @@ Chỉ chạy sau khi cả hai dataset đã có `results.jsonl` và `summary.json
   --model <model>
 ```
 
+### 5. Kiểm thử native RethinkMCTS offline
+
+Lệnh dưới đây chỉ chạy fake LLM/executor trong unit test, không gọi provider:
+
+```powershell
+.\venv\Scripts\python.exe -m unittest discover -s tests -v
+```
+
+Xem kế hoạch search của một bài mà không khởi tạo client:
+
+```powershell
+.\venv\Scripts\python.exe -m rethinkmcts `
+  --dataset humaneval `
+  --problem-id 0 `
+  --run-name rethinkmcts_v1 `
+  --model qwen2.5-coder:7b-instruct `
+  --rollouts 2 `
+  --width 3 `
+  --plan
+```
+
+Smoke provider thật chỉ được chạy sau khi duyệt output offline; xem
+[docs/runbooks/rethinkmcts-smoke.md](docs/runbooks/rethinkmcts-smoke.md).
+
 ## Đọc kết quả
 
 ```text
@@ -222,3 +254,4 @@ outputs/baselines/direct_generation/<run>/<model>/<dataset>/<problem_timestamp>/
 - [docs/gpu/README.md](docs/gpu/README.md): GPU CKEY và Ollama.
 - [docs/decisions.md](docs/decisions.md): các quyết định kiến trúc đã chốt.
 - [docs/implementation-audit.md](docs/implementation-audit.md): phần paper/code còn cần đối chiếu.
+- [docs/rethinkmcts-implementation.md](docs/rethinkmcts-implementation.md): native search và artifact.

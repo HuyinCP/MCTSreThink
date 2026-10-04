@@ -15,8 +15,9 @@ Tài liệu này phân biệt rõ mô tả trong paper với hành vi đã quan 
 | `baselines/direct_generation/` | Direct generation package; bước chấm được tách sang `Executors/` |
 | `pipelines/direct_baseline.py` | Điều phối generation hoàn tất trước parallel evaluation |
 | `evaluation/batch_evaluation.py` | Process pool theo candidate; report JSONL/CSV/summary và resume |
-| `requirements.txt` | Đã tổng hợp từ import của code hiện tại và repo gốc; chưa cài/xác minh toàn bộ |
-| `RethinkMCTS/` | Chưa tồn tại |
+| `requirements.txt` | Đã tổng hợp từ import của code hiện tại và repo gốc; native offline tests đã chạy |
+| `vendor_rethinkmcts/` | Repo tác giả, pin commit `3908cacd94feed849f671f6de39f0baec00ed72c`, giữ nguyên để audit |
+| `rethinkmcts/` | Native tree/P-UCB/reward/feedback/search loop và CLI plan đã triển khai |
 | Dataset | Đã chuẩn bị, xem `docs/datasets.md` |
 | `data/scripts/prepare_humaneval.py` | Sau bước kiểm tra dữ liệu cục bộ vẫn gọi `load_dataset()` ở cuối, nên có thể truy cập mạng không cần thiết |
 | `data/scripts/prepare_apps.py` | Chỉ kiểm tra thư mục `raw` tồn tại, chưa tự xác minh đủ file/số mẫu trước khi bỏ qua |
@@ -26,8 +27,25 @@ Tài liệu này phân biệt rõ mô tả trong paper với hành vi đã quan 
 | Windows portability | Executor gốc import module Unix `resource`; cần xử lý hoặc chạy trong Linux/WSL |
 | `pyext` compatibility | `pyext==0.7` không build trên Python 3.14; cần thay `RuntimeModule.from_string` bằng local shim |
 
-Kết luận: workspace đã có direct-generation baseline và executor offline độc lập,
-nhưng chưa phải implementation chạy được của RethinkMCTS.
+Kết luận: workspace có direct-generation baseline, executor offline độc lập và native
+implementation có thể đọc/test offline; smoke provider thật vẫn chưa chạy.
+
+## Sửa sai lệch native (2026-10-04)
+
+- Selection trước đây ưu tiên cứng unvisited; nay chọn theo P-UCB cho toàn bộ child.
+  Điểm hòa được tie-break bằng RNG cục bộ theo seed.
+- Expansion nay yêu cầu đúng `width` thought khác nhau; trước đây parser âm thầm
+  nhận ít hơn cấu hình và làm cây có độ rộng không mong muốn.
+- Vòng Rethink trước đây chỉ sửa một lần dù cấu hình lớn hơn; nay sửa lặp có giới hạn,
+  dừng khi public tests pass và dùng feedback cuối để Expansion khi còn rollout.
+- Node bị thay thought nay reset visit/Q/prior, tránh gán thống kê action cũ cho action
+  mới; ancestor giữ lịch sử vì state của ancestor không đổi. Candidate cũ vẫn giữ.
+- Candidate artifact nay ghi snapshot thought tại thời điểm Evaluation; trước đây
+  `thoughts.json` có thể phản ánh thought sau Rethink.
+- Trace cho APPS call-based nay luôn được trả về. Trace AST giảm gán lặp event và
+  ghi trạng thái biến trước/sau, nhưng **chưa tạo CFG thực** như repo tác giả.
+- Chưa kiểm chứng bằng smoke Ollama hoặc so output với upstream trên cùng problem;
+  không gọi đây là tương đương hoàn toàn với paper.
 
 ## Paper mô tả, code cần xác minh
 
@@ -43,20 +61,20 @@ nhưng chưa phải implementation chạy được của RethinkMCTS.
 | Final answer | Code có reward cao nhất trong `program_dict` | Deduplicate và xử lý cùng reward |
 | APPS tests | Public để search, private để báo kết quả | Quy tắc chia test cụ thể |
 
-## Checklist sau khi clone repo gốc
+## Checklist audit repo gốc
 
-- [ ] Ghi URL, branch và commit hash.
-- [ ] Lập sơ đồ entry point và module.
-- [ ] Đọc loader APPS/HumanEval.
-- [ ] Đọc executor và timeout policy.
-- [ ] Đọc node/state/action representation.
-- [ ] Đọc implementation P-UCB và backpropagation.
-- [ ] Đọc prompt expansion, code generation, self-eval và rethink.
-- [ ] Xác định nơi tạo verbal feedback/block trace.
-- [ ] Ghi mọi khác biệt với `theory-rethinkmcts.md`.
-- [ ] Xác định repo gốc dùng SDK/call pattern nào và tạo adapter Modal phù hợp.
-- [ ] Kiểm tra response usage, timeout, retry và lỗi rate limit của endpoint Modal.
-- [ ] Không sửa code gốc trước khi có một lần chạy baseline được lưu log.
+- [x] Ghi URL, branch và commit hash tại `vendor_rethinkmcts/`.
+- [x] Lập sơ đồ entry point và module.
+- [x] Đọc loader APPS/HumanEval.
+- [x] Đọc executor và timeout policy.
+- [x] Đọc node/state/action representation.
+- [x] Đọc implementation P-UCB và backpropagation.
+- [x] Đọc prompt expansion, code generation, self-eval và rethink.
+- [x] Xác định nơi tạo verbal feedback/block trace.
+- [x] Ghi các khác biệt chính trong `docs/rethinkmcts-implementation.md`.
+- [x] Tạo adapter OpenAI-compatible dùng client hiện tại; chưa gọi provider trong task này.
+- [ ] Kiểm tra response usage, timeout, retry và lỗi rate limit của provider trong smoke thật.
+- [x] Không sửa code upstream.
 
 ## Mẫu ghi quan sát
 

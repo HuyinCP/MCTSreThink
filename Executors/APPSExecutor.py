@@ -120,6 +120,7 @@ class AppsExecutor:
         *,
         split: str = "test",
         max_tests: int | None = None,
+        test_indices: list[int] | None = None,
     ) -> ExecutionReport:
         if split not in {"train", "test"}:
             raise ValueError("APPS split must be 'train' or 'test'")
@@ -135,12 +136,21 @@ class AppsExecutor:
             raise ValueError(f"Invalid APPS test schema: {tests_path}")
         if len(inputs) != len(outputs):
             raise ValueError("APPS inputs and outputs must have the same length")
-        if max_tests is not None:
+        if max_tests is not None and test_indices is not None:
+            raise ValueError("max_tests and test_indices are mutually exclusive")
+        if test_indices is not None:
+            if any(index < 0 or index >= len(inputs) for index in test_indices):
+                raise ValueError("test_indices contains an out-of-range test")
+            selected = [(inputs[index], outputs[index]) for index in test_indices]
+            selected_indices = list(test_indices)
+        elif max_tests is not None:
             if max_tests <= 0:
                 raise ValueError("max_tests must be greater than zero")
             selected = list(zip(inputs, outputs))[:max_tests]
+            selected_indices = list(range(len(selected)))
         else:
             selected = list(zip(inputs, outputs))
+            selected_indices = list(range(len(selected)))
 
         function_name = payload.get("fn_name")
         mode = "call_based" if function_name else "stdin_stdout"
@@ -152,7 +162,7 @@ class AppsExecutor:
                 )
             return self._run_stdin_case(code, index, test_input, expected)
 
-        indexed_cases = list(enumerate(selected))
+        indexed_cases = list(zip(selected_indices, selected))
         if self.test_workers == 1 or len(indexed_cases) <= 1:
             results = [run_case(item) for item in indexed_cases]
         else:

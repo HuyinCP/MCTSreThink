@@ -14,6 +14,8 @@ Xem chi tiết đầy đủ trong thư mục `docs/`:
 - `docs/pipeline-direct.md` — pipeline generation trước, parallel evaluation sau
 - `docs/implementation-audit.md` — đối chiếu paper với code và các điểm cần xác minh
 - `docs/decisions.md` — các quyết định phạm vi/kiến trúc đã chốt
+- `docs/rethinkmcts-implementation.md` — kiến trúc native và khác biệt với repo tác giả
+- `docs/runbooks/rethinkmcts-smoke.md` — kiểm thử offline và smoke test native
 
 **LUÔN đọc các file trong `docs/` trước khi thực hiện bất kỳ task nào liên quan đến thuật toán,
 dataset, hoặc kế hoạch — không tự suy đoán lại từ đầu.**
@@ -23,17 +25,15 @@ liên quan; không cần nạp lại mọi tài liệu nếu source of truth đ�
 
 ## Giai đoạn hiện tại (quan trọng — đọc kỹ trước khi hành động)
 
-**Đang ở bước: DIRECT-GENERATION + OFFLINE EVALUATION - CHƯA MCTS.**
+**Đang ở bước: RETHINKMCTS NATIVE IMPLEMENTATION - READY FOR SMOKE TEST.**
 
 Mục tiêu ngay bây giờ:
-1. Load đúng một bài APPS hoặc HumanEval mà không đọc solution/test.
-2. Gửi đề bài tới LLM trên Modal bằng một request.
-3. Nhận, bóc và lưu code cùng metadata/token usage.
-4. Chấm candidate bằng executor riêng và lưu số test pass/pass rate.
+1. Đọc/audit repo tác giả tại `vendor_rethinkmcts/`.
+2. Kiểm thử offline native tree, reward, feedback và search loop bằng fake LLM/executor.
+3. Chỉ sau khi đọc code mới smoke một bài APPS và một bài HumanEval qua Ollama.
 
 **KHÔNG làm ở giai đoạn này** (để dành cho giai đoạn sau, xem `docs/plan.md`):
-- Chưa triển khai MCTS/RethinkMCTS.
-- Chưa viết code MCTS riêng của mình.
+- Không chạy full benchmark MCTS.
 - Chưa thêm reward TLE-aware.
 - Chưa thêm root-cause identification.
 - Không sử dụng CodeContests trong phạm vi dự án hiện tại.
@@ -87,12 +87,15 @@ rethinkmcts-project/
 │   ├── implementation-audit.md
 │   ├── llm-provider.md
 │   ├── decisions.md
+│   ├── rethinkmcts-implementation.md
 │   ├── gpu/
 │   │   └── README.md
 │   └── runbooks/
 │       ├── README.md
-│       └── baseline-full.md
-├── RethinkMCTS/                 (repo gốc, sẽ clone vào đây)
+│       ├── baseline-full.md
+│       └── rethinkmcts-smoke.md
+├── vendor_rethinkmcts/          (repo tác giả, pin commit để audit; không sửa)
+├── rethinkmcts/                  (implementation native: tree, search, feedback, runner)
 ├── baselines/
 │   ├── generate_apps.py
 │   ├── generate_humaneval.py

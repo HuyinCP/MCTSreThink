@@ -8,17 +8,19 @@ loại thông tin: điều đã kiểm chứng, điều đang dự định và �
 1. [project-status.md](project-status.md): trạng thái thực tế mới nhất và bước kế tiếp.
 2. [plan.md](plan.md): roadmap, phạm vi từng giai đoạn và điều kiện hoàn thành.
 3. [theory-rethinkmcts.md](theory-rethinkmcts.md): thuật toán từ paper nền tảng.
-4. [datasets.md](datasets.md): quyết định sử dụng APPS và HumanEval.
-5. [baseline-direct.md](baseline-direct.md): baseline đưa đề bài cho LLM và nhận code.
-6. [executors.md](executors.md): chạy code và tính số test pass cho từng dataset.
-7. [pipeline-direct.md](pipeline-direct.md): generation trước, evaluation song song sau.
-8. [environment.md](environment.md): virtual environment và dependency.
-9. [implementation-audit.md](implementation-audit.md): khoảng cách giữa paper và code.
-10. [llm-provider.md](llm-provider.md): cấu hình Ollama/Modal và quy tắc sử dụng API.
-11. [decisions.md](decisions.md): các quyết định đã chốt và lý do.
-12. [theory-rap.md](theory-rap.md): đối chiếu khái niệm với RAP, không phải baseline chính.
-13. [gpu/README.md](gpu/README.md): thông tin instance CKEY, Ollama và kế hoạch chạy GPU thuê.
-14. [runbooks/README.md](runbooks/README.md): hướng dẫn thao tác generation/evaluation theo từng bước.
+4. [rethinkmcts/README.md](../rethinkmcts/README.md): thuật toán native từng bước và chi phí mỗi node.
+5. [rethinkmcts-implementation.md](rethinkmcts-implementation.md): kiến trúc bản native và khác biệt với repo gốc.
+6. [datasets.md](datasets.md): quyết định sử dụng APPS và HumanEval.
+7. [baseline-direct.md](baseline-direct.md): baseline đưa đề bài cho LLM và nhận code.
+8. [executors.md](executors.md): chạy code và tính số test pass cho từng dataset.
+9. [pipeline-direct.md](pipeline-direct.md): generation trước, evaluation song song sau.
+10. [environment.md](environment.md): virtual environment và dependency.
+11. [implementation-audit.md](implementation-audit.md): khoảng cách giữa paper và code.
+12. [llm-provider.md](llm-provider.md): cấu hình Ollama/Modal và quy tắc sử dụng API.
+13. [decisions.md](decisions.md): các quyết định đã chốt và lý do.
+14. [theory-rap.md](theory-rap.md): đối chiếu khái niệm với RAP, không phải baseline chính.
+15. [gpu/README.md](gpu/README.md): thông tin instance CKEY, Ollama và kế hoạch chạy GPU thuê.
+16. [runbooks/README.md](runbooks/README.md): hướng dẫn thao tác generation/evaluation và smoke test.
 
 ## Source of truth
 
@@ -27,6 +29,8 @@ loại thông tin: điều đã kiểm chứng, điều đang dự định và �
 | Trạng thái hiện tại, blocker, bước tiếp theo | `docs/project-status.md` |
 | Roadmap và phạm vi từng giai đoạn | `docs/plan.md` |
 | Công thức/thuật toán RethinkMCTS | `docs/theory-rethinkmcts.md` |
+| Diễn giải từng bước của bản native và chi phí mỗi node | `rethinkmcts/README.md` |
+| Kiến trúc implementation native và khác biệt với repo gốc | `docs/rethinkmcts-implementation.md` |
 | Dataset nào được dùng và vì sao | `docs/datasets.md` |
 | Cấu trúc file, schema và cách load dữ liệu | `data/README.md` |
 | Hành vi và cách chạy direct-generation baseline | `docs/baseline-direct.md` |

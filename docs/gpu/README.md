@@ -102,9 +102,9 @@ ollama run qwen2.5-coder:7b-instruct
 curl http://127.0.0.1:11434/api/tags
 ```
 
-Sau khi provider Ollama được tích hợp vào project, smoke benchmark sẽ chạy một bài
-APPS và một bài HumanEval, kiểm tra `response.txt`, `solution.py` và `metadata.json`
-trước khi chạy batch lớn.
+Provider Ollama đã được tích hợp vào native search. Smoke test sẽ chạy một bài APPS
+và một bài HumanEval, kiểm tra `response.txt`, `solution.py`, `metadata.json` và
+`events.jsonl` trước khi chạy batch lớn.
 
 ## Quy mô benchmark đã chốt tạm thời
 

@@ -2,6 +2,32 @@
 
 Các quyết định ở đây được xem là đang có hiệu lực cho tới khi có entry mới thay thế.
 
+## D-020: Selection, Rethink và tính toàn vẹn candidate native
+
+- Ngày: 2026-10-04
+- Trạng thái: Chấp nhận
+- Quyết định: Chọn child bằng P-UCB thuần; seed chỉ chi phối tie-break cục bộ.
+  Rethink sửa thought tại node tối đa theo cấu hình, reset visit/Q/prior của
+  action bị thay; giữ candidate cũ cùng thought snapshot. Khi vẫn fail và còn
+  rollout, Expansion điều kiện hóa trên feedback cuối.
+- Lý do: Tránh chọn unvisited bất chấp P-UCB, tránh gán reward/prior của thought
+  cũ cho thought mới và tránh sai lịch sử artifact.
+- Giới hạn: Trace portable hiện mới là AST statement span + runtime snapshots,
+  không phải CFG hoàn chỉnh; seed không điều khiển sampling bên provider.
+
+## D-019: Native RethinkMCTS package và upstream audit snapshot
+
+- Ngày: 2026-09-27
+- Trạng thái: Chấp nhận
+- Quyết định: Giữ repo tác giả tại `vendor_rethinkmcts/` và triển khai native tại
+  `rethinkmcts/`. Upstream pin commit `3908cacd94feed849f671f6de39f0baec00ed72c`.
+- Lý do: Windows không phân biệt `RethinkMCTS` và `rethinkmcts`; tách tên vendor tránh
+  xung đột import và giữ rõ code gốc với code thí nghiệm.
+- Ràng buộc: Không sửa source upstream; artifact native nằm dưới `outputs/rethinkmcts/`,
+  không dùng chung `outputs/baselines/`.
+- Phạm vi v1: faithful paper implementation, public/private policy theo repo gốc, chưa
+  thêm TLE-aware reward hoặc root-cause identification.
+
 ## D-018: Full generation, sampled evaluation judge
 
 - Ngày: 2026-09-27
