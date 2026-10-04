@@ -1,8 +1,9 @@
 # Runbook scope (2026-09-27)
 
 Direct baseline đã hoàn tất với model `qwen2.5-coder:7b-instruct` qua Ollama.
-Native RethinkMCTS đã sẵn sàng ở mức offline; runbook smoke ở bước tiếp theo sẽ
-dùng cùng dataset/sample policy nhưng artifact riêng dưới `outputs/rethinkmcts/`.
+Native RethinkMCTS đã sẵn sàng ở mức offline; runbook smoke ở bước tiếp theo
+chạy từng bài, còn batch MCTS tương lai dùng cohort `benchmark_v2/` và artifact
+riêng dưới `outputs/rethinkmcts/`.
 
 # Runbooks
 
@@ -12,7 +13,11 @@ Runbook là các lệnh thao tác có thể copy/chạy trực tiếp. Root
 ## Runbook hiện tại
 
 - [Full direct baseline](baseline-full.md): generation full, evaluation sample cố
-  định và benchmark judge.
+  định 100+100 lịch sử và benchmark judge.
+- [Benchmark v2](benchmark-v2.md): cohort cố định APPS 300 + HumanEval 164 cho
+  các run mới; chưa chạy.
+- [Remote evaluation](remote-evaluation.md): đóng gói cohort, chạy worker trong
+  Docker trên máy thuê và tải báo cáo về; chưa triển khai lên instance mới.
 - [RethinkMCTS smoke](rethinkmcts-smoke.md): test native offline và smoke một bài
   HumanEval/APPS sau khi duyệt output.
 
@@ -23,7 +28,8 @@ Runbook là các lệnh thao tác có thể copy/chạy trực tiếp. Root
 2. Với direct baseline, chạy `--plan` trước batch lớn.
 3. Với native RethinkMCTS, chạy unit test offline và `--plan` trước provider smoke.
 4. Generation full không truyền `--sample-file`.
-5. Evaluation dùng đúng manifest trong `data/samples/evaluation_v1/`.
+5. Run lịch sử dùng `data/samples/evaluation_v1/`; run mới dùng
+   `data/samples/benchmark_v2/` (APPS 300 + HumanEval 164).
 6. Judge chỉ chạy sau khi cả APPS và HumanEval có `results.jsonl`.
 
 ## Quy tắc resume

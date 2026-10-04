@@ -11,6 +11,11 @@ D:\ReThinkMCTS\venv
 
 Không dùng Python/pip global khi chạy script, cài dependency hoặc kiểm thử.
 
+Riêng workflow [remote evaluation](runbooks/remote-evaluation.md) chạy trên
+Linux trong Docker image Python 3.11 với dependency tối thiểu ở
+`tools/remote_evaluation/requirements.txt`. `D:\ReThinkMCTS\venv` của Windows
+chỉ dùng để chuẩn bị bundle tại máy cục bộ; không copy venv này sang máy thuê.
+
 ## Lệnh PowerShell
 
 Kích hoạt môi trường:
@@ -45,12 +50,16 @@ phù hợp nhưng **chưa cài đặt** chúng vào `venv`.
 
 Đã cài nhóm tối thiểu cho direct baseline: `openai`, `python-dotenv`, `datasets` và
 các dependency bắc cầu của chúng. Nhóm MCTS/PyTorch trong manifest chưa được cài.
+Ngày 2026-10-04 đã cài `langgraph` và `pydantic` trong chính `venv` cho native
+workflow; `pip check` không báo dependency lỗi. Đây không phải là việc cài
+toàn bộ nhóm PyTorch của repo tác giả.
 
 ## Nhóm dependency
 
 | Nhóm | Package chính |
 |---|---|
 | LLM | `openai`, `python-dotenv`, `tiktoken` |
+| Native workflow | `langgraph`, `pydantic` |
 | Dataset | `datasets`, `jsonlines`, `numpy` |
 | Runtime | `torch`, `accelerate`, `transformers`, `torcheval`, `torchmetrics` |
 | Phân tích code | `astor`, `astroid`, `astunparse`; local shim thay `pyext` |

@@ -23,6 +23,11 @@ Hai executor trả về `ExecutionReport` với các trường chính:
 | `tests` | Kết quả từng test, gồm status, output, lỗi và thời gian |
 
 Status từng test gồm `passed`, `wrong_answer`, `runtime_error` hoặc `timeout`.
+
+Chấm trên máy thuê: [runbook remote evaluation](runbooks/remote-evaluation.md)
+đóng gói đúng cohort và chạy evaluator này trong Docker. Container giới hạn
+tài nguyên ở cấp batch, chưa cô lập từng test; giới hạn hiện tại vẫn là timeout
+từng test APPS hoặc cả harness HumanEval, không phải timeout tổng cho một bài.
 Output/error dài được cắt bớt trong báo cáo để tránh artifact tăng không giới hạn.
 Batch evaluator dùng danh sách test này để ghi `failed_test_indices`; expected,
 actual và traceback chi tiết vẫn được giữ trong `evaluation.json` từng bài.
@@ -106,7 +111,7 @@ bên trong container/VM riêng, tắt mạng và đặt giới hạn CPU/RAM ở
 - Timeout được ghi nhận và tiến trình kết thúc.
 - `HumanEval/0` pass với implementation đúng và fail với implementation sai.
 - Không có request nào được gửi tới Modal trong quá trình test.
-## Đánh giá lại với timeout rộng hơn
+## Đánh giá lại run lịch sử với timeout rộng hơn
 
 Mặc định APPS dùng timeout `2` giây cho từng test case. Để kiểm tra lại các
 candidate mà không dừng quá sớm, chạy:

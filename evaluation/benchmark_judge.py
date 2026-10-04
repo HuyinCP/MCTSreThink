@@ -15,8 +15,8 @@ from baselines.direct_generation.pipeline import safe_path_component
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "outputs" / "baselines"
-DEFAULT_APPS_SAMPLE = PROJECT_ROOT / "data" / "samples" / "evaluation_v1" / "apps_test_100.json"
-DEFAULT_HUMANEVAL_SAMPLE = PROJECT_ROOT / "data" / "samples" / "evaluation_v1" / "humaneval_test_100.json"
+DEFAULT_APPS_SAMPLE = PROJECT_ROOT / "data" / "samples" / "benchmark_v2" / "apps_test_300.json"
+DEFAULT_HUMANEVAL_SAMPLE = PROJECT_ROOT / "data" / "samples" / "benchmark_v2" / "humaneval_test_164.json"
 DIFFICULTY_ORDER = ("introductory", "interview", "competition")
 DIFFICULTY_LABELS = {
     "introductory": "APPS Intro.",

@@ -18,6 +18,11 @@ mới. LLM sinh các thought để mở rộng cây, rồi sinh code hoàn chỉ
 thought tại node được chọn. Code được *thực thi để đánh giá node*, chứ bản thân
 code không phải action của cây.
 
+Luồng các bước dưới đây do [workflow.py](workflow.py) (`LangGraph StateGraph`)
+điều phối. Pydantic kiểm tra state điều phối và thought từ Expansion; công thức
+P-UCB, reward và executor vẫn là code miền riêng. Graph hiện chạy tuần tự và
+**chưa bật checkpointer**, nên không có resume giữa chừng.
+
 $$
 s_t=(P,z_1,z_2,\ldots,z_t),\qquad a_t=z_{t+1}
 $$
@@ -211,10 +216,12 @@ chọn mới chấm code đó trên private tests (APPS) hoặc official harness
 (HumanEval). Kết quả cuối **không** quay lại cập nhật cây.
 
 **Phân biệt paper với dự án:** paper đánh giá APPS 300 bài (100 bài mỗi mức
-khó) và HumanEval 164 bài. Dự án hiện tại dùng manifest cố định **100 APPS
-ngẫu nhiên + 100 HumanEval** tại `data/samples/evaluation_v1/` để so sánh
-baseline/MCTS sau này. MCTS runner hiện chỉ chạy **một problem mỗi lần**; chưa
-có experiment runner cho 100 bài và chưa có kết quả MCTS thật.
+khó) và HumanEval 164 bài. Benchmark mới dùng đúng cohort APPS 300 của nhóm
+đối chiếu và toàn bộ HumanEval trong `data/samples/benchmark_v2/`. Baseline
+đã hoàn thành trước đó dùng **100 APPS + 100 HumanEval** tại
+`data/samples/evaluation_v1/` và không được gán sang cohort mới. MCTS runner
+hiện chỉ chạy **một problem mỗi lần**; chưa có experiment runner 300+164
+hay kết quả MCTS thật.
 
 Khi tổng hợp trên sample của dự án:
 
@@ -257,6 +264,7 @@ ghi secret.
 | --- | --- |
 | State, candidate, Backpropagation, Rethink tại node | [tree.py](tree.py) |
 | P-UCB | [policies.py](policies.py) |
+| LangGraph routing, Pydantic workflow state | [workflow.py](workflow.py) |
 | Expansion/Evaluation/search loop | [search.py](search.py) |
 | Reward | [reward.py](reward.py) |
 | Public/private policy, LLM adapter, artifact | [runner.py](runner.py) |

@@ -6,6 +6,8 @@ import unittest
 from pathlib import Path
 from types import SimpleNamespace
 
+from pydantic import ValidationError
+
 from Executors.common import ExecutionReport, TestCaseResult
 from rethinkmcts.config import SearchConfig
 from rethinkmcts.feedback.trace import collect_trace, format_trace
@@ -15,6 +17,7 @@ from rethinkmcts.reward import compute_reward
 from rethinkmcts.runner import ArtifactWriter, DatasetSearchExecutor, LLMOperations, _given_tests_from_prompt, load_context
 from rethinkmcts.search import ProblemContext, SearchEngine, SearchResult
 from rethinkmcts.tree import CandidateRecord, SearchNode
+from rethinkmcts.workflow import WorkflowState, build_search_graph
 
 
 def report(*, passed: bool, dataset: str = "apps") -> ExecutionReport:
@@ -48,7 +51,7 @@ class FakeLLM:
     def expand_thoughts(self, context, node, width):
         from rethinkmcts.parsing import ThoughtProposal
 
-        return [ThoughtProposal("Use a direct algorithm.", 1.0)]
+        return [ThoughtProposal(thought="Use a direct algorithm.", reasonableness=1.0)]
 
     def generate_code(self, context, node):
         self.generated += 1
@@ -96,6 +99,18 @@ class RethinkMCTSTests(unittest.TestCase):
         self.assertEqual([proposal.thought for proposal in proposals], ["A", "B"])
         self.assertAlmostEqual(sum(proposal.reasonableness for proposal in proposals), 1.0)
 
+    def test_pydantic_contracts_reject_invalid_graph_state_and_thought(self):
+        from rethinkmcts.parsing import ThoughtProposal
+
+        with self.assertRaises(ValidationError):
+            WorkflowState(root="not a tree")
+        with self.assertRaises(ValidationError):
+            WorkflowState(root=SearchNode("root"), rollout=-1)
+        with self.assertRaises(ValidationError):
+            ThoughtProposal(thought="", reasonableness=1.0)
+        with self.assertRaises(ValidationError):
+            ThoughtProposal(thought="valid", reasonableness=2.0)
+
     def test_parse_score_clips_to_paper_range(self):
         self.assertEqual(parse_score('{"evaluation": 4}'), 1.0)
         self.assertEqual(parse_score('{"evaluation": -4}'), -1.0)
@@ -107,6 +122,8 @@ class RethinkMCTSTests(unittest.TestCase):
             parse_thoughts('[{"thought": "Only one", "reasonableness": 1}]', width=2)
         with self.assertRaises(ValueError):
             parse_thoughts('[{"thought": "Same", "reasonableness": 0.5}, {"thought": "same", "reasonableness": 0.5}]', width=2)
+        with self.assertRaises(ValueError):
+            parse_thoughts('[{"thought": "A", "reasonableness": NaN}]', width=1)
 
     def test_prompt_examples_become_humaneval_given_tests(self):
         tests = _given_tests_from_prompt(
@@ -250,6 +267,39 @@ class RethinkMCTSTests(unittest.TestCase):
         self.assertIsNone(llm.expansion_feedback[0])
         self.assertIsNotNone(llm.expansion_feedback[1])
         self.assertEqual(result.root.children[0].q_value, 0.0)
+
+    def test_langgraph_routes_multiple_rollouts_to_finalization(self):
+        context = ProblemContext("apps", "test", "0000", "Return ok.", public_test_count=1)
+        events = []
+        llm = FakeLLM()
+        engine = SearchEngine(
+            context,
+            llm,
+            FakeExecutor(),
+            SearchConfig(rollouts=16, width=1, max_rethink_times=1),
+            on_event=events.append,
+        )
+        self.assertTrue({"select", "expand", "evaluate", "rethink", "advance", "finalize"}.issubset(
+            build_search_graph(engine).get_graph().nodes
+        ))
+        result = engine.run()
+        self.assertEqual(len([event for event in events if event["event"] == "select"]), 16)
+        self.assertEqual(len([event for event in events if event["event"] == "complete"]), 1)
+        self.assertEqual(result.best_candidate.code, "good")
+
+    def test_langgraph_skips_rethink_when_disabled(self):
+        context = ProblemContext("apps", "test", "0000", "Return ok.", public_test_count=1)
+        events = []
+        result = SearchEngine(
+            context,
+            FakeLLM(),
+            FakeExecutor(),
+            SearchConfig(rollouts=1, width=1, max_rethink_times=0),
+            on_event=events.append,
+        ).run()
+        self.assertEqual(len(result.candidates), 1)
+        self.assertEqual(result.best_candidate.code, "bad")
+        self.assertFalse(any(event["event"] in {"rethink", "rethink_next"} for event in events))
 
     def test_call_based_apps_trace_returns_block_feedback(self):
         with tempfile.TemporaryDirectory() as temp_dir:

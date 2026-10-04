@@ -16,9 +16,12 @@ run: qwen25_coder_7b_instruct_baseline_v1
 Phạm vi đã chạy:
 
 - Sinh code: toàn bộ APPS test (5.000 bài) và HumanEval test (164 bài).
-- Đánh giá: sample cố định 100 bài APPS và 100 bài HumanEval.
+- Đã đánh giá: sample lịch sử 100 APPS + 100 HumanEval (`evaluation_v1`).
+- Benchmark tương lai: đúng 300 APPS + toàn bộ 164 HumanEval (`benchmark_v2`);
+  chưa chạy judge/MCTS trên cohort mới.
 - Judge: APPS Pass Rate/Pass@1 theo difficulty và HumanEval Pass@1.
-- RethinkMCTS native: **đã triển khai và kiểm thử offline**, chưa gọi LLM thật.
+- RethinkMCTS native: **đã triển khai và kiểm thử offline**; LangGraph điều
+  phối search, Pydantic kiểm tra state; chưa gọi LLM thật.
 - Bước kế tiếp: smoke test 1 HumanEval và 1 APPS với Ollama trên GPU CKEY.
 
 Kết quả baseline hiện tại:
@@ -44,6 +47,9 @@ Kết quả chi tiết nằm trong:
 6. [rethinkmcts/README.md](rethinkmcts/README.md): thuật toán native từng bước, chi phí mỗi node và điểm khác paper.
 7. [docs/rethinkmcts-implementation.md](docs/rethinkmcts-implementation.md): kiến trúc native, artifact và khác biệt với repo tác giả.
 8. [docs/runbooks/rethinkmcts-smoke.md](docs/runbooks/rethinkmcts-smoke.md): kiểm thử offline và lệnh smoke test.
+9. [docs/runbooks/benchmark-v2.md](docs/runbooks/benchmark-v2.md): danh sách cohort mới và lệnh đánh giá 300+164.
+10. [docs/runbooks/remote-evaluation.md](docs/runbooks/remote-evaluation.md): đóng gói và chấm trên máy GPU thuê.
+11. [docs/benchmark-results.md](docs/benchmark-results.md): nơi lưu bảng và tham số của từng run.
 
 ## Kiến trúc thư mục
 
@@ -87,7 +93,8 @@ D:\ReThinkMCTS\
 Quy ước quan trọng:
 
 - `data/` là input; không sửa trực tiếp file raw hoặc Arrow.
-- `data/samples/evaluation_v1/` là sample judge chính thức dùng chung cho model và MCTS sau này.
+- `data/samples/benchmark_v2/` là cohort chung cho các model và MCTS sau này.
+- `data/samples/evaluation_v1/` giữ nguyên để truy vết kết quả baseline 100+100.
 - `outputs/` là output; mỗi run được tách theo `run/model/dataset`.
 - Không dùng CodeContests trong phạm vi hiện tại.
 - Native search không ghi artifact vào `outputs/baselines/`; hai namespace được tách độc lập.
@@ -138,7 +145,12 @@ Generation full không dùng sample judge. Resume mặc định bỏ qua artifac
   --confirm-full-run
 ```
 
-### 3. Đánh giá sample cố định
+### 3. Đánh giá cohort cố định cho run mới
+
+Dùng run name mới cho cohort 300+164; không chạy lại trên cùng namespace
+evaluation 100+100 cũ. Generation vẫn sinh full, còn evaluation chọn theo
+hai manifest dưới đây. Số liệu baseline hiện tại ở đầu README **không** phải
+kết quả của cohort mới.
 
 APPS:
 
@@ -148,7 +160,7 @@ APPS:
   --dataset apps `
   --run-name <run_name> `
   --model <model> `
-  --sample-file data/samples/evaluation_v1/apps_test_100.json `
+  --sample-file data/samples/benchmark_v2/apps_test_300.json `
   --workers 8 `
   --test-workers 4 `
   --evaluation-timeout 300 `
@@ -163,7 +175,7 @@ HumanEval:
   --dataset humaneval `
   --run-name <run_name> `
   --model <model> `
-  --sample-file data/samples/evaluation_v1/humaneval_test_100.json `
+  --sample-file data/samples/benchmark_v2/humaneval_test_164.json `
   --workers 8 `
   --evaluation-timeout 300 `
   --confirm-full-run
@@ -208,6 +220,15 @@ Smoke provider thật chỉ được chạy sau khi duyệt output offline; xem
 [docs/runbooks/rethinkmcts-smoke.md](docs/runbooks/rethinkmcts-smoke.md).
 
 ## Đọc kết quả
+
+Kết quả chấm gốc nằm dưới `outputs/baselines/evaluations/<run>/<model>/`.
+Với benchmark mới 300 APPS + 164 HumanEval, bảng đã khóa cùng tham số chạy,
+cohort, hash dữ liệu/code và chỉ mục candidate nằm tại
+`outputs/benchmarks/<run>/<model>/` (`run.json`, `candidates.csv`,
+`benchmark_table.md`). Bảng đối chiếu nhiều run nằm trong
+`outputs/benchmarks/comparisons/<name>/`; xem
+[docs/benchmark-results.md](docs/benchmark-results.md). Cohort 100+100 trước
+đây là kết quả lịch sử riêng, không trộn vào benchmark mới.
 
 ```text
 outputs/baselines/evaluations/<run>/<model>/

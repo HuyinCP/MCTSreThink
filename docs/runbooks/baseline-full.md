@@ -8,10 +8,12 @@ Run hien tai dung model Ollama `qwen2.5-coder:7b-instruct` tren GPU CKEY va chay
 - HumanEval test: 164 bai.
 - Tong: 5.164 request LLM truoc retry.
 
-Run name dang dung: `qwen25_coder_7b_instruct_baseline_v1`.
+Run name lich su: `qwen25_coder_7b_instruct_baseline_v1`.
 
-Hai manifest `baseline_v1` được giữ riêng để truy vết lịch sử. Sample judge chính
-thức cho baseline và MCTS sau này là `data/samples/evaluation_v1/`.
+Runbook nay tai lap benchmark **lich su 100+100**, khong phai cohort moi.
+Hai manifest `baseline_v1` duoc giu rieng de truy vet. Cohort cho cac run moi
+va MCTS la `data/samples/benchmark_v2/` (APPS 300 + HumanEval 164); xem
+[`docs/datasets.md`](../datasets.md). Khong ghi de evaluation run cu khi doi cohort.
 Full generation không truyền `--sample-file`.
 
 Judge cua full run dung hai manifest rieng:
@@ -123,7 +125,9 @@ bo sung candidate missing vao denominator, roi tao metric va bang ket qua:
 ```powershell
 .\venv\Scripts\python.exe -m evaluation.benchmark_judge `
   --run-name qwen25_coder_7b_instruct_baseline_v1 `
-  --model qwen2.5-coder:7b-instruct
+  --model qwen2.5-coder:7b-instruct `
+  --apps-sample-file data/samples/evaluation_v1/apps_test_100.json `
+  --humaneval-sample-file data/samples/evaluation_v1/humaneval_test_100.json
 ```
 
 APPS co macro Pass Rate, micro Pass Rate va Pass@1 theo Intro/Inter/Comp/Overall.

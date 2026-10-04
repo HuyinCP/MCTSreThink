@@ -1,5 +1,10 @@
 # GPU thuê CKEY
 
+**Instance ghi trong tài liệu này đã hết hạn.** Host và port bên dưới chỉ là
+lịch sử, không dùng làm lệnh kết nối mới. Khi thuê lại, điền endpoint mới theo
+[runbook remote evaluation](../runbooks/remote-evaluation.md) và kiểm tra Docker
+trước khi chạy code do LLM sinh.
+
 ## Benchmark đã hoàn thành
 
 Sau khi instance CKEY hoat dong, benchmark duoc chot nhu sau:
@@ -9,7 +14,8 @@ Sau khi instance CKEY hoat dong, benchmark duoc chot nhu sau:
 - HumanEval: 100 bài test trong `data/samples/evaluation_v1/humaneval_test_100.json`.
 - Run: `qwen25_coder_7b_instruct_baseline_v1`.
 - Generation: bat dau `--generation-workers 1`; chi tang len 2 neu Ollama on dinh.
-- MCTS về sau dùng lại hai manifest `evaluation_v1`, không sample lại.
+- MCTS về sau dùng hai manifest `benchmark_v2` (300 APPS + 164 HumanEval),
+  không sample lại; hai dòng 100 bài ở trên là kết quả lịch sử.
 
 Lenh generation/evaluation chinh thuc nam trong `baselines/README.md` va
 `docs/pipeline-direct.md`.
@@ -23,7 +29,7 @@ thông tin của instance hiện tại, không phải cấu hình cố định c
 ## Trạng thái hiện tại
 
 - Nhà cung cấp: CKEY.VN, dịch vụ GPU3.
-- Trạng thái lúc ghi nhận: hoạt động, khởi tạo xong.
+- Trạng thái lúc ghi nhận: hoạt động, khởi tạo xong; **hiện đã hết hạn**.
 - Image: `chieustudio/openwebui-ollama-ubuntu:latest`.
 - Khu vực: UA.
 - GPU: `1x RTX 3090 - 24 GB`.
@@ -35,7 +41,7 @@ thông tin của instance hiện tại, không phải cấu hình cố định c
 
 Không ghi username/password, token hoặc secret vào tài liệu này.
 
-## Endpoint và port mapping
+## Endpoint và port mapping của instance cũ (không dùng lại)
 
 | Mục đích | Endpoint bên ngoài | Port trong GPU |
 |---|---|---:|
@@ -49,7 +55,7 @@ Benchmark nên chạy trực tiếp trên GPU thuê và gọi Ollama qua
 chạy cùng máy. Nếu cần gọi từ Windows, ưu tiên SSH tunnel thay vì mở API không có
 authentication.
 
-## Kế hoạch runtime
+## Kế hoạch runtime cũ (tham khảo)
 
 1. Chờ instance chuyển sang `Hoạt động`.
 2. SSH vào máy bằng port `2797`.
@@ -83,8 +89,8 @@ LLM_API_KEY=ollama
 Modal vẫn được giữ như provider cũ, nhưng không dùng cho benchmark GPU này. Các
 biến môi trường thật không được commit hoặc ghi vào log.
 
-Nếu tạm thời chạy pipeline từ máy Windows thay vì copy project lên GPU, có thể dùng
-endpoint public được CKEY map:
+Ở instance cũ, nếu chạy pipeline từ Windows, endpoint public từng được map
+như sau; **không dùng endpoint này cho instance mới**:
 
 ```env
 LLM_BASE_URL=http://n2.ckey.vn:2800/v1
@@ -106,11 +112,11 @@ Provider Ollama đã được tích hợp vào native search. Smoke test sẽ ch
 và một bài HumanEval, kiểm tra `response.txt`, `solution.py`, `metadata.json` và
 `events.jsonl` trước khi chạy batch lớn.
 
-## Quy mô benchmark đã chốt tạm thời
+## Quy mô benchmark cho run mới
 
 - Generation: chay full APPS 5.000 bai va HumanEval 164 bai.
-- Judge evaluation: chi chay sample moi 100 bai moi dataset trong
-  `data/samples/evaluation_v1/`.
+- Judge evaluation: 300 APPS + 164 HumanEval theo hai manifest trong
+  `data/samples/benchmark_v2/`. Chưa chạy trên cohort này.
 - Generation: bắt đầu với 1 worker, tối đa 2 worker sau khi xác nhận GPU ổn định.
 - `max_tokens`: đặt giới hạn hữu hạn, khuyến nghị ban đầu `8192` hoặc `16384` cho
   Qwen2.5:7B; không dùng `null` trong smoke test.

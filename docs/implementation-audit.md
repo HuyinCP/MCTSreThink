@@ -32,6 +32,12 @@ implementation có thể đọc/test offline; smoke provider thật vẫn chưa 
 
 ## Sửa sai lệch native (2026-10-04)
 
+Sau các sửa thuật toán bên dưới, phần điều phối đã chuyển sang LangGraph.
+Chuyển đổi này chỉ thay luồng control, không thay P-UCB/reward/public-private
+policy. Pydantic chặn state sai kiểu, thought rỗng, score không hữu hạn và
+response Expansion thiếu/thừa; kết quả offline cần được xác nhận thêm bằng
+smoke provider thật. LangGraph hiện chưa có checkpoint/resume giữa chừng.
+
 - Selection trước đây ưu tiên cứng unvisited; nay chọn theo P-UCB cho toàn bộ child.
   Điểm hòa được tie-break bằng RNG cục bộ theo seed.
 - Expansion nay yêu cầu đúng `width` thought khác nhau; trước đây parser âm thầm
@@ -93,6 +99,7 @@ Câu hỏi còn mở:
 # Cap nhat provider/benchmark (2026-09-27)
 
 Phan audit Modal ben duoi la lich su cua run cu. Benchmark hien tai dung Ollama
-voi `qwen2.5-coder:7b-instruct` va hai sample manifest co dinh tai
-`data/samples/evaluation_v1/`; xem `docs/llm-provider.md` và `docs/pipeline-direct.md`.
+voi `qwen2.5-coder:7b-instruct` va hai sample manifest lich su tai
+`data/samples/evaluation_v1/`. Cohort moi la `data/samples/benchmark_v2/`;
+xem `docs/llm-provider.md` và `docs/pipeline-direct.md`.
 

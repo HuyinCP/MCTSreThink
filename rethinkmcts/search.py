@@ -9,7 +9,6 @@ from Executors.common import ExecutionReport
 
 from .config import SearchConfig
 from .parsing import ThoughtProposal, extract_code
-from .policies import select_child
 from .reward import compute_reward
 from .tree import CandidateRecord, SearchNode
 
@@ -249,62 +248,34 @@ class SearchEngine:
         )
         return candidate
 
-    def _rethink(self, node: SearchNode, candidate: CandidateRecord) -> CandidateRecord | None:
+    def _rethink(self, node: SearchNode, candidate: CandidateRecord) -> bool:
         if candidate.public_pass_rate >= 1.0 or node.rethink_count >= self.config.max_rethink_times:
-            return None
+            return False
         feedback_text = json.dumps(candidate.feedback or {}, ensure_ascii=False)
         replacement = self._call_content(
             self.llm.rethink(self.context, node, candidate.code, feedback_text)
         ).strip()
         if not replacement:
-            return None
+            return False
         node.replace_last_thought(replacement, feedback=candidate.feedback)
         self._event("rethink", node_id=node.node_id, replacement=replacement)
-        return self._evaluate(node, phase="rethink")
+        return True
 
     def run(self) -> SearchResult:
-        root = SearchNode(node_id="root")
-        for rollout in range(self.config.rollouts):
-            node = root
-            while node.children:
-                node = select_child(
-                    node,
-                    c_base=self.config.c_base,
-                    exploration_weight=self.config.exploration_weight,
-                    rng=self.rng,
-                )
-            self._expand(node)
-            node = select_child(
-                node,
-                c_base=self.config.c_base,
-                exploration_weight=self.config.exploration_weight,
-                rng=self.rng,
-            )
-            self._event("select", rollout=rollout, node_id=node.node_id)
-            candidate = self._evaluate(node, phase="initial")
-            while candidate.public_pass_rate < 1.0 and node.rethink_count < self.config.max_rethink_times:
-                refined = self._rethink(node, candidate)
-                if refined is None:
-                    break
-                candidate = refined
-            if candidate.public_pass_rate < 1.0 and rollout + 1 < self.config.rollouts:
-                self._event("rethink_next", rollout=rollout, node_id=node.node_id)
-                self._expand(node)
+        from .workflow import WorkflowState, build_search_graph
 
-        best = max(self.candidates, key=lambda item: item.reward, default=None)
-        private_evaluation = None
-        if best is not None:
-            private_evaluation = self.executor.evaluate_private(self.context, best.code).to_dict()
-        self._event(
-            "complete",
-            candidate_count=len(self.candidates),
-            best_candidate_id=best.candidate_id if best else None,
-            best_reward=best.reward if best else None,
+        root = SearchNode(node_id="root")
+        recursion_limit = max(25, self.config.rollouts * (4 + 2 * self.config.max_rethink_times) + 10)
+        state = WorkflowState.model_validate(
+            build_search_graph(self).invoke(
+                WorkflowState(root=root),
+                {"recursion_limit": recursion_limit},
+            )
         )
         return SearchResult(
             context=self.context,
             root=root,
             candidates=self.candidates,
-            best_candidate=best,
-            private_evaluation=private_evaluation,
+            best_candidate=state.best_candidate,
+            private_evaluation=state.private_evaluation,
         )

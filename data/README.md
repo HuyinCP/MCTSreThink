@@ -10,11 +10,18 @@ data/samples/baseline_v1/apps_test_100.json
 data/samples/baseline_v1/humaneval_test_100.json
 data/samples/evaluation_v1/apps_test_100.json
 data/samples/evaluation_v1/humaneval_test_100.json
+data/samples/benchmark_v2/apps_test_300.json
+data/samples/benchmark_v2/humaneval_test_164.json
 ```
 
-`baseline_v1` là sample tham chiếu cũ được giữ để truy vết lịch sử. `evaluation_v1`
-là sample judge chính thức cho baseline hiện tại và các thí nghiệm MCTS sau này.
-Không bốc lại ID khi đổi model hoặc phương pháp.
+`baseline_v1` và `evaluation_v1` là sample lịch sử; kết quả baseline 100+100
+đã công bố nội bộ gắn với `evaluation_v1`, không đổi hoặc gán lại số liệu.
+`benchmark_v2` là cohort cho **các lần chạy mới**: APPS 300 ID phân tầng
+(100 introductory, 100 interview, 100 competition; seed 2027) lấy đúng từ
+[manifest của nhóm đối chiếu](https://github.com/Viendeptrai1/rethink-mcts-slm/blob/main/data/cohorts/apps_benchmark_300.json),
+và HumanEval toàn bộ 164 ID từ `0` đến `163`. Repo đối chiếu dùng tiền tố
+`apps_` và `Python/`; loader cục bộ dùng ID số và `HumanEval/` tương ứng.
+Không bốc lại ID khi đổi model hoặc phương pháp. Chưa chạy judge trên cohort mới.
 
 Mỗi manifest có `sample_id`, `dataset`, `split`, `seed`, `population_size`,
 `sample_size` và `problem_ids`. Manifest APPS còn có `difficulty_by_problem_id`
@@ -47,9 +54,12 @@ data/
 │   ├── baseline_v1/
 │   │   ├── apps_test_100.json
 │   │   └── humaneval_test_100.json
-│   └── evaluation_v1/
-│       ├── apps_test_100.json
-│       └── humaneval_test_100.json
+│   ├── evaluation_v1/
+│   │   ├── apps_test_100.json
+│   │   └── humaneval_test_100.json
+│   └── benchmark_v2/
+│       ├── apps_test_300.json
+│       └── humaneval_test_164.json
 ├── scripts/
 │   ├── prepare_apps.py
 │   └── prepare_humaneval.py

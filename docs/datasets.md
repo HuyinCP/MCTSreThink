@@ -1,26 +1,27 @@
 # Dataset của dự án
 
-## Pham vi benchmark da khoa
+## Benchmark cohort cho cac lan chay moi
 
-Dataset goc khong doi: APPS test co 5.000 bai va HumanEval test co 164 bai. De
-kiem soat chi phi va giu cung mot tap so sanh cho MCTS, benchmark baseline hien tai
-chi chon dung 100 bai ngau nhien moi dataset:
+Dataset goc khong doi: APPS test 5.000 bai, HumanEval test 164 bai. Cohort
+`benchmark_v2` duoc khoa cho model/MCTS va judge tu nay ve sau:
 
-| Dataset | Sample manifest | So bai benchmark | Co dinh cho MCTS |
+| Dataset | Manifest | Quy mo | Cach chon |
 |---|---|---:|---|
-| APPS test | `data/samples/evaluation_v1/apps_test_100.json` | 100 | Co |
-| HumanEval test | `data/samples/evaluation_v1/humaneval_test_100.json` | 100 | Co |
+| APPS test | `data/samples/benchmark_v2/apps_test_300.json` | 300 | Dung 100 ID moi muc kho tu cohort cua nhom doi chieu |
+| HumanEval test | `data/samples/benchmark_v2/humaneval_test_164.json` | 164 | Toan bo `HumanEval/0` den `HumanEval/163` |
 
-`baseline_v1` là sample lịch sử được giữ để truy vết, không phải sample judge hiện tại.
-Sample dùng cho judge full-generation được khóa riêng:
+APPS duoc lay tu [manifest goc](https://github.com/Viendeptrai1/rethink-mcts-slm/blob/main/data/cohorts/apps_benchmark_300.json)
+va [script chon mau](https://github.com/Viendeptrai1/rethink-mcts-slm/blob/main/scripts/sample_apps_300_stratified.py):
+loc `len(inputs) >= 3` va `len(inputs) == len(outputs)`, sau do lay mau ngau
+nhien phan tang khong hoan lai, seed `2027`, 100 bai moi muc introductory,
+interview, competition. Nguon HumanEval la [processed.jsonl](https://github.com/Viendeptrai1/rethink-mcts-slm/blob/main/data/humaneval/processed.jsonl)
+du 164 `Python/0..163`; ID so duoc doi chieu voi `HumanEval/0..163` cuc bo.
 
-| Dataset | Judge manifest | So bai |
-|---|---|---:|
-| APPS test | `data/samples/evaluation_v1/apps_test_100.json` | 100 |
-| HumanEval test | `data/samples/evaluation_v1/humaneval_test_100.json` | 100 |
-
-Seed cua sample v1 la `20260927`. Khong dung `--limit 100` thay cho manifest vi
-`--limit` chi lay 100 ID dau, khong phai sample ngau nhien da khoa.
+`evaluation_v1` (100 APPS + 100 HumanEval) la benchmark **da chay truoc day**;
+giu nguyen manifest va ket qua de truy vet, khong so truc tiep voi cohort moi.
+`baseline_v1` con cu hon va cung duoc giu de truy vet. Generation full khong
+truyen `--sample-file`. Khong dung `--limit` thay cho manifest vi no chi lay
+nhung ID dau, khong giu dung cohort.
 
 File này ghi quyết định cấp dự án. Cấu trúc file, schema chi tiết và ví dụ đọc dữ
 liệu nằm tại [../data/README.md](../data/README.md).

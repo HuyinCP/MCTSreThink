@@ -108,6 +108,8 @@ class EvaluationPipelineTests(unittest.TestCase):
             self.assertEqual(status, 0)
             self.assertTrue((artifact / "evaluation.json").is_file())
             self.assertEqual(summary["fully_passed"], 1)
+            self.assertEqual(summary["evaluation_config"]["test_policy"], "official_harness")
+            self.assertEqual(summary["evaluation_config"]["timeout_seconds"], 5.0)
             self.assertEqual(summary["pass_at_1"], 1.0)
             self.assertTrue((summary_path.parent / "results.csv").is_file())
             self.assertTrue((summary_path.parent / "results.jsonl").is_file())

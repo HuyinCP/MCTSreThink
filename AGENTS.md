@@ -27,6 +27,10 @@ liên quan; không cần nạp lại mọi tài liệu nếu source of truth đ�
 
 **Đang ở bước: RETHINKMCTS NATIVE IMPLEMENTATION - READY FOR SMOKE TEST.**
 
+Benchmark tương lai đã chốt tại `data/samples/benchmark_v2/`: APPS 300 ID
+(100 mỗi mức khó theo cohort nhóm đối chiếu) và HumanEval đủ 164 ID. Kết quả
+baseline 100+100 thuộc `evaluation_v1` là lịch sử, không đổi nhãn hoặc ghi đè.
+
 Mục tiêu ngay bây giờ:
 1. Đọc/audit repo tác giả tại `vendor_rethinkmcts/`.
 2. Kiểm thử offline native tree, reward, feedback và search loop bằng fake LLM/executor.
@@ -85,6 +89,7 @@ rethinkmcts-project/
 │   ├── pipeline-direct.md
 │   ├── environment.md
 │   ├── implementation-audit.md
+│   ├── benchmark-results.md
 │   ├── llm-provider.md
 │   ├── decisions.md
 │   ├── rethinkmcts-implementation.md
@@ -93,6 +98,8 @@ rethinkmcts-project/
 │   └── runbooks/
 │       ├── README.md
 │       ├── baseline-full.md
+│       ├── benchmark-v2.md
+│       ├── remote-evaluation.md
 │       └── rethinkmcts-smoke.md
 ├── vendor_rethinkmcts/          (repo tác giả, pin commit để audit; không sửa)
 ├── rethinkmcts/                  (implementation native: tree, search, feedback, runner)
@@ -122,13 +129,17 @@ rethinkmcts-project/
 │   │   ├── baseline_v1/
 │   │   │   ├── apps_test_100.json
 │   │   │   └── humaneval_test_100.json
-│   │   └── evaluation_v1/
-│   │       ├── apps_test_100.json
-│   │       └── humaneval_test_100.json
+│   │   ├── evaluation_v1/
+│   │   │   ├── apps_test_100.json
+│   │   │   └── humaneval_test_100.json
+│   │   └── benchmark_v2/
+│   │       ├── apps_test_300.json
+│   │       └── humaneval_test_164.json
 │   ├── apps/
 │   │   └── raw/
 │   └── humaneval/
 │       └── arrow/
 ├── tools/                       (smoke/check script ngoài pipeline)
+│   └── remote_evaluation/       (đóng gói cohort và runner Docker máy thuê)
 └── notebooks/                   (thử nghiệm nhanh, quan sát log)
 ```

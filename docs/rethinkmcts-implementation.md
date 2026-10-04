@@ -22,15 +22,22 @@ rethinkmcts/
 ├── parsing.py      # thought/score/code/feedback parser
 ├── prompts.py      # expansion, code, self-evaluation, feedback, rethink
 ├── reward.py       # Dual Evaluation reward
+├── workflow.py     # LangGraph StateGraph và Pydantic WorkflowState
 ├── feedback/
 │   ├── trace.py    # AST blocks + sys.settrace runtime values
 │   └── verbal.py   # block-level feedback bundle
-├── search.py       # Selection -> Expansion -> Evaluation -> Feedback -> Backprop -> Rethink
+├── search.py       # Logic miền: expand, evaluate, feedback, backprop, rethink
 ├── runner.py       # loader, executor adapter, provider adapter, artifact writer
 └── cli.py          # entry point một problem
 ```
 
 ## Quy tắc search
+
+Điều phối hiện dùng LangGraph `StateGraph` tuần tự trong `workflow.py`:
+`select -> expand -> evaluate -> (rethink -> evaluate)* -> advance -> finalize`.
+`WorkflowState` là Pydantic model kiểm tra kiểu node/candidate, rollout và phase;
+`ThoughtProposal` cũng được kiểm tra bằng Pydantic. P-UCB, reward, tree và
+executor vẫn là code miền độc lập, không được thay bằng agent framework.
 
 - Selection so trực tiếp P-UCB cho mọi child, kể cả child chưa thăm; không có
   ưu tiên cứng cho unvisited. Khi điểm bằng nhau, `--seed` điều khiển tie-break
@@ -77,6 +84,10 @@ tại thời điểm candidate được chấm, không lấy từ node đã bị
 
 Artifact hoàn chỉnh được resume tự động; không tạo request mới nếu đã có
 `search_summary.json` và `final_solution.py`.
+Graph hiện **không có checkpointer**: LangGraph không tự khôi phục một search
+đang dở. Resume giữa chừng, retry provider và chạy nhiều problem song song
+vẫn là công việc riêng; graph này không tự gọi LangSmith hay provider trong
+offline test.
 
 ## Offline check
 

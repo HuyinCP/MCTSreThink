@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import os
 import statistics
 import sys
+import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -108,7 +110,14 @@ def discover_candidates(
     latest: dict[str, Candidate] = {}
     if not run_root.is_dir():
         return []
+    selected_dirs = (
+        {safe_path_component(key) for key in selected_problem_keys}
+        if selected_problem_keys is not None
+        else None
+    )
     for metadata_path in run_root.glob(f"*/{dataset}/*/metadata.json"):
+        if selected_dirs is not None and metadata_path.parent.name.rsplit("_", 1)[0] not in selected_dirs:
+            continue
         try:
             metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
@@ -202,7 +211,8 @@ def _evaluate_candidate(payload: dict[str, Any]) -> dict[str, Any]:
             pass
 
     try:
-        code = (candidate.artifact_dir / "solution.py").read_text(encoding="utf-8")
+        solution_bytes = (candidate.artifact_dir / "solution.py").read_bytes()
+        code = solution_bytes.decode("utf-8")
         if candidate.dataset == "apps":
             from Executors import AppsExecutor
 
@@ -222,6 +232,12 @@ def _evaluate_candidate(payload: dict[str, Any]) -> dict[str, Any]:
             executor = HumanevalExecutor(timeout=payload["timeout"] or 5.0)
             execution = executor.evaluate(code, candidate.problem_id)
         report = execution.to_dict()
+        report["evaluation_provenance"] = {
+            "solution_sha256": hashlib.sha256(solution_bytes).hexdigest(),
+            "timeout_seconds": payload["timeout"] if payload["timeout"] is not None else (2.0 if candidate.dataset == "apps" else 5.0),
+            "test_workers": payload["test_workers"],
+            "max_tests": payload["max_tests"],
+        }
         temporary = report_path.with_suffix(".json.tmp")
         temporary.write_text(
             json.dumps(report, ensure_ascii=False, indent=2) + "\n",
@@ -256,6 +272,7 @@ def _write_aggregate(
     model: str,
     dataset: str,
     workers: int,
+    evaluation_config: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     aggregate_dir.mkdir(parents=True, exist_ok=True)
     rows.sort(key=lambda row: row["problem_id"])
@@ -315,6 +332,7 @@ def _write_aggregate(
         "model": model,
         "dataset": dataset,
         "workers": workers,
+        "evaluation_config": evaluation_config or {},
         "total_candidates": len(rows),
         "fully_passed": fully_passed,
         "partially_passed": partially_passed,
@@ -416,6 +434,8 @@ def main(
             "--confirm-full-run. Run with --plan first."
         )
 
+    started_at = datetime.now(timezone.utc)
+    started_clock = time.perf_counter()
     payloads = [
         {
             **candidate.__dict__,
@@ -464,6 +484,23 @@ def main(
         model=model,
         dataset=args.dataset,
         workers=args.workers,
+        evaluation_config={
+            "split": args.split,
+            "workers": args.workers,
+            "test_workers": args.test_workers,
+            "timeout_seconds": args.timeout if args.timeout is not None else (2.0 if args.dataset == "apps" else 5.0),
+            "timeout_scope": "per_test" if args.dataset == "apps" else "official_harness",
+            "test_policy": "all_input_output_cases" if args.dataset == "apps" else "official_harness",
+            "max_tests": args.max_tests,
+            "sample_manifest": str(args.sample_file) if args.sample_file is not None else None,
+            "sample_manifest_sha256": hashlib.sha256(args.sample_file.read_bytes()).hexdigest() if args.sample_file is not None else None,
+        },
+    )
+    summary["started_at_utc"] = started_at.isoformat()
+    summary["finished_at_utc"] = datetime.now(timezone.utc).isoformat()
+    summary["wall_time_seconds"] = round(time.perf_counter() - started_clock, 3)
+    (aggregate_dir / "summary.json").write_text(
+        json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
     print(
         f"Evaluation finished: {summary['fully_passed']}/"

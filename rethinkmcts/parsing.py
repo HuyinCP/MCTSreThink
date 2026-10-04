@@ -1,15 +1,18 @@
 from __future__ import annotations
 
 import json
+import math
 import re
-from dataclasses import dataclass
 from typing import Any
 
+from pydantic import BaseModel, ConfigDict, Field
 
-@dataclass(frozen=True)
-class ThoughtProposal:
-    thought: str
-    reasonableness: float
+
+class ThoughtProposal(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    thought: str = Field(min_length=1)
+    reasonableness: float = Field(ge=0.0, le=1.0, allow_inf_nan=False)
 
 
 def _json_payload(text: str) -> Any:
@@ -56,6 +59,8 @@ def parse_thoughts(text: str, *, width: int = 3) -> list[ThoughtProposal]:
             numeric_score = float(score)
         except (TypeError, ValueError):
             numeric_score = 0.0
+        if not math.isfinite(numeric_score):
+            raise ValueError("LLM expansion score must be finite")
         proposals.append(ThoughtProposal(thought=thought.strip(), reasonableness=max(0.0, min(1.0, numeric_score))))
     if len(proposals) != width:
         raise ValueError(f"LLM expansion must contain exactly {width} usable thoughts")
@@ -64,8 +69,11 @@ def parse_thoughts(text: str, *, width: int = 3) -> list[ThoughtProposal]:
     total = sum(item.reasonableness for item in proposals)
     if total <= 0:
         uniform = 1.0 / len(proposals)
-        return [ThoughtProposal(item.thought, uniform) for item in proposals]
-    return [ThoughtProposal(item.thought, item.reasonableness / total) for item in proposals]
+        return [ThoughtProposal(thought=item.thought, reasonableness=uniform) for item in proposals]
+    return [
+        ThoughtProposal(thought=item.thought, reasonableness=item.reasonableness / total)
+        for item in proposals
+    ]
 
 
 def parse_score(text: str) -> float:

@@ -21,6 +21,9 @@ loại thông tin: điều đã kiểm chứng, điều đang dự định và �
 14. [theory-rap.md](theory-rap.md): đối chiếu khái niệm với RAP, không phải baseline chính.
 15. [gpu/README.md](gpu/README.md): thông tin instance CKEY, Ollama và kế hoạch chạy GPU thuê.
 16. [runbooks/README.md](runbooks/README.md): hướng dẫn thao tác generation/evaluation và smoke test.
+17. [runbooks/benchmark-v2.md](runbooks/benchmark-v2.md): cohort 300+164 và lệnh evaluation cho run mới.
+18. [runbooks/remote-evaluation.md](runbooks/remote-evaluation.md): chạy judge trên CPU máy thuê, không dùng worker laptop.
+19. [benchmark-results.md](benchmark-results.md): hồ sơ tham số và bảng benchmark bất biến theo run/model.
 
 ## Source of truth
 
@@ -32,6 +35,7 @@ loại thông tin: điều đã kiểm chứng, điều đang dự định và �
 | Diễn giải từng bước của bản native và chi phí mỗi node | `rethinkmcts/README.md` |
 | Kiến trúc implementation native và khác biệt với repo gốc | `docs/rethinkmcts-implementation.md` |
 | Dataset nào được dùng và vì sao | `docs/datasets.md` |
+| Cohort benchmark mới và ID cố định | `data/samples/benchmark_v2/` |
 | Cấu trúc file, schema và cách load dữ liệu | `data/README.md` |
 | Hành vi và cách chạy direct-generation baseline | `docs/baseline-direct.md` |
 | Giao diện, cách chấm và giới hạn an toàn của executor | `docs/executors.md` |
@@ -42,6 +46,7 @@ loại thông tin: điều đã kiểm chứng, điều đang dự định và �
 | Quyết định kiến trúc/phạm vi đã chốt | `docs/decisions.md` |
 | Lệnh vận hành benchmark theo từng bước | `docs/runbooks/baseline-full.md` |
 | Metric Pass Rate/Pass@1 và bảng judge | `evaluation/benchmark_judge.py` |
+| Lưu trữ, schema và so sánh các bảng benchmark | `docs/benchmark-results.md` |
 
 Không sao chép toàn bộ cùng một nội dung sang nhiều file. File khác chỉ nên tóm tắt
 và liên kết tới source of truth tương ứng.

@@ -38,8 +38,8 @@ provider: Ollama trên GPU CKEY
 run: qwen25_coder_7b_instruct_baseline_v1
 ```
 
-Generation full không truyền `--sample-file`. Evaluation judge mới dùng sample
-cố định:
+Generation full không truyền `--sample-file`. Hai manifest dưới đây là của
+**benchmark v1 đã chạy**, không phải cohort cho các run mới:
 
 ```text
 data/samples/evaluation_v1/apps_test_100.json
@@ -47,7 +47,12 @@ data/samples/evaluation_v1/humaneval_test_100.json
 ```
 
 Hai file `data/samples/baseline_v1/` chỉ là sample lịch sử được giữ để truy vết.
-Không dùng chúng cho bảng benchmark hiện tại.
+Không dùng chúng cho benchmark v2.
+
+Benchmark từ nay về sau dùng `data/samples/benchmark_v2/apps_test_300.json`
+và `data/samples/benchmark_v2/humaneval_test_164.json`; xem
+[`docs/runbooks/benchmark-v2.md`](../docs/runbooks/benchmark-v2.md). Dùng run
+name mới khi đổi cohort để không ghi đè kết quả 100+100 cũ.
 
 ## Lệnh chính
 

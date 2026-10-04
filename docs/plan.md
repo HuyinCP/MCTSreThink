@@ -85,7 +85,7 @@ Baseline chỉ được xem là chạy được khi đáp ứng đủ:
 ## Bối cảnh direct baseline
 
 Direct baseline đã sinh full APPS test và HumanEval test với model
-`qwen2.5-coder:7b-instruct` qua Ollama. Judge dùng sample cố định 100 bài mỗi
-dataset trong `data/samples/evaluation_v1/`; native RethinkMCTS sẽ dùng lại policy
-này khi thiết kế experiment runner.
+`qwen2.5-coder:7b-instruct` qua Ollama. Judge đã chạy sample lịch sử 100 bài mỗi
+dataset trong `data/samples/evaluation_v1/`. Experiment runner mới dùng cohort
+`data/samples/benchmark_v2/` (300 APPS + 164 HumanEval); chưa có kết quả MCTS.
 

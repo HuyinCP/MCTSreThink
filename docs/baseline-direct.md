@@ -3,9 +3,10 @@
 ## Benchmark v1 da khoa
 
 Baseline v1 dung `qwen2.5-coder:7b-instruct` qua Ollama. Generation chay full
-dataset; judge evaluation dung 100 bai moi dataset trong
-`data/samples/evaluation_v1/`. Sample `baseline_v1` la tap tham chieu rieng va
-khong thay the sample judge.
+dataset; judge **da chay** 100 bai moi dataset trong
+`data/samples/evaluation_v1/`. Cohort cho cac run moi la
+`data/samples/benchmark_v2/` (300 APPS + 164 HumanEval). Sample
+`baseline_v1` la tap tham chieu rieng va khong thay the hai cohort tren.
 
 Run name: `qwen25_coder_7b_instruct_baseline_v1`. Artifact luon co model namespace
 de khong tron ket qua giua cac model.

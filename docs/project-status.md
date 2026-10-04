@@ -16,8 +16,8 @@ chưa chạy benchmark MCTS thật.
 | Provider | Ollama trên GPU CKEY |
 | Run | `qwen25_coder_7b_instruct_baseline_v1` |
 | Generation | APPS test 5.000 + HumanEval test 164 |
-| Judge sample | APPS 100 + HumanEval 100 |
-| Sample manifest | `data/samples/evaluation_v1/` |
+| Judge sample đã chạy | APPS 100 + HumanEval 100 |
+| Manifest của kết quả cũ | `data/samples/evaluation_v1/` |
 
 Kết quả judge đã kiểm chứng:
 
@@ -47,6 +47,12 @@ outputs/baselines/evaluations/
 - Dataset cục bộ có APPS train/test, mỗi split 5.000 bài.
 - HumanEval Arrow có 164 bài test.
 - Sample judge có đúng 100 ID duy nhất cho mỗi dataset và được khóa bằng seed.
+- Cohort cho các run mới đã khóa tại `data/samples/benchmark_v2/`: 300 ID APPS
+  (100 mỗi độ khó, đúng danh sách nhóm đối chiếu) và toàn bộ 164 HumanEval.
+  Chưa chấm hay có metric trên cohort mới.
+- Đối chiếu cục bộ: 300 ID APPS đều tồn tại ở split test, đúng difficulty,
+  có ít nhất 3 input/output tương ứng; 164 HumanEval trùng task index,
+  entry point và prompt với dữ liệu `processed.jsonl` của nhóm đối chiếu.
 - Generation lưu `solution.py`, `response.txt`, `metadata.json` và `problem.txt`
   theo `run/model/dataset/problem_timestamp`.
 - APPS executor hỗ trợ `stdin_stdout` và `call_based`.
@@ -55,7 +61,7 @@ outputs/baselines/evaluations/
   `--test-workers`.
 - Judge tạo macro Pass Rate, micro Pass Rate và Pass@1 cho APPS; HumanEval chỉ
   báo Pass@1 theo quy ước đã chốt.
-- Unit test hiện tại pass `45/45`, gồm direct baseline, executor, judge, pipeline
+- Unit test hiện tại pass `56/56`, gồm direct baseline, executor, judge, pipeline
   và native RethinkMCTS.
 - Code generated của baseline không bị thay đổi trong quá trình cleanup tài liệu.
 - Run cũ Modal/Qwen được giữ riêng trong namespace `direct_full_v1`.
@@ -64,13 +70,22 @@ outputs/baselines/evaluations/
 - Native package nằm tại `rethinkmcts/`, artifact tách dưới `outputs/rethinkmcts/`.
 - Native selection, vòng Rethink, candidate thought snapshot và APPS call-based
   trace đã được chỉnh theo audit; xem `docs/implementation-audit.md`.
+- Native search được điều phối bằng LangGraph, với Pydantic state và thought
+  contract; offline tests xác nhận routing, nhiều rollout và Rethink.
+- Đã chuẩn bị workflow đóng gói candidate cohort 300+164 và Docker evaluator
+  trên máy thuê. Bundle từ run baseline cũ chứa đủ 300+164 candidate và plan
+  sau giải nén nhận đúng số bài. Chưa triển khai lên CKEY instance mới, chưa
+  chấm benchmark v2.
+- Đã thêm hồ sơ benchmark bất biến dưới `outputs/benchmarks/<run>/<model>/`
+  để lưu tham số thực tế, cohort/data/code hash, candidate index và bảng; chưa
+  có hồ sơ kết quả v2 vì chưa chấm trên remote.
 
 ## Quyết định phạm vi
 
 - Không dùng CodeContests.
 - Generation full và evaluation sample là hai phạm vi độc lập.
-- Mọi model/MCTS sau này phải dùng lại `data/samples/evaluation_v1/` khi cần
-  so sánh công bằng.
+- Mọi model/MCTS mới phải dùng lại `data/samples/benchmark_v2/`; số liệu
+  baseline 100+100 hiện tại chỉ thuộc `evaluation_v1` và không được đổi nhãn.
 - Candidate bị manual stop được ghi rõ trong `evaluation.json`, không sửa
   `solution.py`.
 
@@ -80,8 +95,14 @@ outputs/baselines/evaluations/
 - Đối chiếu output native với log/reward của repo gốc sau khi có smoke run.
 - Thay trace AST hiện tại bằng CFG/basic-block đầy đủ nếu cần đối chiếu feedback
   chính xác với repo gốc.
-- Tách executor vào sandbox/container có giới hạn mạng, CPU và RAM thật sự.
-- Thiết kế experiment runner cho 100 bài sample và nhiều model/rollout.
+- Cô lập từng test APPS/HumanEval trong sandbox riêng; Docker hiện chỉ giới
+  hạn toàn bộ batch và chưa chống candidate đọc test/artifact cùng container.
+- Xác nhận instance CKEY mới hỗ trợ Docker, rồi smoke remote evaluation trước
+  khi chạy 300+164; Docker hiện chỉ cô lập cả batch, chưa từng test riêng.
+- Thiết kế experiment runner cho cohort 300 APPS + 164 HumanEval và nhiều
+  model/rollout.
+- Bổ sung checkpoint/resume giữa chừng nếu cần; LangGraph hiện chạy không có
+  checkpointer, chỉ resume được artifact search đã hoàn tất.
 
 ## Cách cập nhật
 

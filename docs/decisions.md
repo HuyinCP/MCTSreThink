@@ -2,6 +2,56 @@
 
 Các quyết định ở đây được xem là đang có hiệu lực cho tới khi có entry mới thay thế.
 
+## D-024: Hồ sơ benchmark bất biến và so sánh cùng protocol
+
+- Ngày: 2026-10-04
+- Trạng thái: Đã triển khai offline, chờ run v2 thực tế.
+- Quyết định: Giữ output evaluator thô ở `outputs/baselines/evaluations/`, chỉ
+  đóng băng run đủ 300+164 tại `outputs/benchmarks/<run>/<model>/`. Ghi manifest
+  và dữ liệu test hash, cấu hình generation/evaluation, môi trường Docker,
+  candidate hash và metric. Bảng so sánh từ chối cohort/policy/timeout khác.
+- Lý do: Truy vết chính xác tham số chạy và tránh so sánh nhầm 100+100 với
+  300+164 hoặc ghi đè bảng cũ.
+- Giới hạn: Chưa có kết quả v2; MCTS cần adapter candidate riêng khi chạy batch.
+
+## D-023: Chạy evaluation trên CPU máy thuê, artifact tách khỏi laptop
+
+- Ngày: 2026-10-04
+- Trạng thái: Chuẩn bị offline; chờ instance mới và kiểm tra Docker.
+- Quyết định: Đóng gói đúng cohort `benchmark_v2`, code candidate và test data
+  cần thiết; chấm bằng evaluator hiện có trong Docker trên máy thuê, 2 worker
+  ban đầu; thu hồi report dưới run name mới.
+- Lý do: Không chạy code LLM sinh trên laptop, giới hạn tài nguyên và giữ
+  kết quả baseline 100+100 cũ bất biến.
+- Giới hạn: Docker chỉ cô lập batch, chưa cô lập từng test; không chuyển secret.
+  Nếu instance CKEY không có Docker daemon thì chưa chạy.
+
+## D-022: Khoa cohort benchmark doi chieu APPS 300 + HumanEval 164
+
+- Ngày: 2026-10-04
+- Trạng thái: Chấp nhận; thay phạm vi judge/MCTS tương lai trong D-017/D-018.
+- Quyết định: Dùng `data/samples/benchmark_v2/apps_test_300.json` với đúng 300
+  ID của cohort APPS phân tầng seed 2027 từ nhóm đối chiếu; HumanEval dùng toàn
+  bộ 164 bài trong `data/samples/benchmark_v2/humaneval_test_164.json`.
+- Lý do: So sánh trên cùng bài toán với nhóm đối chiếu và giữ cohort cố định
+  cho các model/MCTS tiếp theo.
+- Ràng buộc: Không thay đổi `evaluation_v1` hay gán số liệu baseline 100+100
+  cho cohort mới. Generation full vẫn độc lập với judge. Khi so kết quả giữa
+  hai project, cần thống nhất cả public/hidden test policy, không chỉ ID.
+- Nguồn: https://github.com/Viendeptrai1/rethink-mcts-slm/blob/main/data/cohorts/apps_benchmark_300.json
+
+## D-021: LangGraph điều phối, Pydantic kiểm tra hợp đồng native
+
+- Ngày: 2026-10-04
+- Trạng thái: Chấp nhận
+- Quyết định: Dùng một `StateGraph` tuần tự cho các pha search; dùng Pydantic
+  để kiểm tra `WorkflowState` và `ThoughtProposal`. Giữ P-UCB, tree, reward,
+  executor, provider adapter và output schema ngoài graph.
+- Lý do: Luồng nhánh/retry hiện rõ trong graph, dễ test routing và kiểm tra dữ
+  liệu LLM; không thay đổi công thức hay số request theo chủ ý.
+- Giới hạn: Chưa bật checkpointer hoặc LangSmith tracing; resume chỉ áp dụng
+  cho search đã có artifact hoàn chỉnh. Không gọi API trong test offline.
+
 ## D-020: Selection, Rethink và tính toàn vẹn candidate native
 
 - Ngày: 2026-10-04

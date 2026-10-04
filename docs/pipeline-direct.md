@@ -2,13 +2,14 @@
 
 ## Cau hinh benchmark hien tai
 
-Sample benchmark co dinh cho MCTS/judge chay rieng tung dataset voi manifest bat
-bien va dung cung `--sample-file` o evaluation stage:
+Benchmark moi dung hai manifest `data/samples/benchmark_v2/` (APPS 300 +
+HumanEval 164) va dung cung `--sample-file` cho moi model/MCTS. Doan lenh
+ben duoi la vi du tai lap **run cu 100+100**, khong phai cohort moi:
 
 Cap nhat van hanh: direct baseline da hoan thanh generation va evaluation sample;
 lenh chinh thuc va quy tac resume nam tai
-[`docs/runbooks/baseline-full.md`](runbooks/baseline-full.md). Phan sample 100 o
-duoi van la benchmark tham chieu rieng cho MCTS, khong bi xoa.
+[`docs/runbooks/baseline-full.md`](runbooks/baseline-full.md). Sample 100 o
+duoi chi duoc giu de truy vet ket qua cu.
 
 Phan sample `baseline_v1` ben duoi duoc giu de tham chieu lich su; full generation
 hien tai khong truyen `--sample-file`.

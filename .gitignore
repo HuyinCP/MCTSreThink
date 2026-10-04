@@ -10,3 +10,4 @@ CLAUDE.md
 data/apps/raw/
 data/humaneval/arrow/
 outputs/
+vendor_rethinkmcts/__pycache__
